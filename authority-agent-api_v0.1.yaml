@@ -15,14 +15,15 @@ tags:
     description: Operations for managing the DID connections and invitations sent by the Authority Agent.
     
 paths:
-  /generate-invitation:
+  /generate-invitation/{userId}:
     post:
       tags:
         - DID connection
       summary: Generate DID invitation for establishing a DID communication between the Authority Agent and the student's Edge Agent.
       parameters:
-          - in: query
+          - in: path
             name: userId
+            required: true
             schema:
               type: string
             description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
@@ -36,14 +37,15 @@ paths:
                 $ref: '#/components/schemas/Invitation'
               example:
                   {"serviceEndpoint":"http://alice.aries.example.com:8081","recipientKeys":["did:key:z6MkeUtPN4jBEJ97PrGV5EtgqM9KfbWoFNxeXzHLSEz4EJAp"],"@id":"af62fe2f-d554-46dc-8700-1d92813abab4","label":"alice-agent","@type":"https://didcomm.org/didexchange/1.0/invitation"}
-  /did-conn-status:
+  /did-conn-status/{userId}:
     get:
       tags:
         - DID connection
       summary: Retrieve the current status of the DID connection between the Authority Agent and the student's Edge Agent.
       parameters:
-          - in: query
+          - in: path
             name: userId
+            required: true
             schema:
               type: string
             description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
@@ -69,19 +71,21 @@ paths:
               schema:
                 type: integer
                 example: -1
-  /send-vc-offer:
+  /send-vc-offer/{userId}:
     post:
       tags:
         - offer
       summary: Generate and send a VC offer to the student's Edge Agent for the student to accept before sending him/her the diploma evidence as a VC.
       parameters:
-          - in: query
-            name: userID
+          - in: path
+            name: userId
+            required: true
             schema:
                type: string
             description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
           - in: query
             name: evidence
+            required: true
             content:
               application/xml:
                 schema:
@@ -111,21 +115,25 @@ paths:
       parameters:
         - in: query
           name: myDID
+          required: true
           schema:
             type: string
           description: The DID of the Authority Agent deployed on the Data Owner side.
         - in: query
           name: theirDID
+          required: true
           schema:
             type: string
           description: The DID identifier of the student's Edge Agent.
         - in: query
           name: publicDID
+          required: true
           schema:
             type: string
           description: The DID identifier of the DO Authority Agent, which is optionally registered in the EBSI DID registry (TIR).
         - in: query
           name: evidence
+          required: true
           schema:
             type: string
           description: The diploma evidence in the canonical XML format, which is to be converted to VC JSON-LD format and digitally signed by using the issuer's public DID.
@@ -146,14 +154,15 @@ paths:
                     example: {}
                   
   
-  /check-offer-vc-response:
+  /check-offer-vc-response/{userId}:
     get:
       tags:
         - verifiable credentials
       summary: Check the current status of the student's response to the VC or offer sent by the Authority Agent.
       parameters:
-          - in: query
-            name: userID
+          - in: path
+            name: userId
+            required: true
             schema:
                type: string
             description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
@@ -215,14 +224,15 @@ paths:
                 type: integer
                 example: -4 
                 
-  /send-vc:
+  /send-vc/{userId}:
     post:
       tags:
         - verifiable credentials
       summary: Send a digitally signed verifiable credential to the student after the offer was accepted.
       parameters:
-          - in: query
-            name: userID
+          - in: path
+            name: userId
+            required: true
             schema:
                type: string
             description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
@@ -244,14 +254,15 @@ paths:
                 type: boolean
                 example: false
         
-  /send-vp-request:
+  /send-vp-request/{userId}:
     get:
       tags:
         - verifiable presentations
       summary: Request the student to submit a verifiable presentation (VP) in a given format.
       parameters:
-          - in: query
-            name: userID
+          - in: path
+            name: userId
+            required: true
             schema:
                type: string
             description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
@@ -276,14 +287,15 @@ paths:
                 type: boolean
                 example: false     
    
-  /check-request-vp-response:
+  /check-request-vp-response/{userId}:
     get:
       tags:
         - verifiable presentations
       summary: Retrieve the current status of the VP submission or request for VP.
       parameters:
-          - in: query
-            name: userID
+          - in: path
+            name: userId
+            required: true
             schema:
                type: string
             description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
@@ -317,19 +329,21 @@ paths:
                 type: integer
                 example: -2   
          
-  /validate-vp:
+  /validate-vp/{userId}:
     get:
       tags:
         - verifiable presentations
       summary: Validate the validity of the submitted verifiable presentation with regards to its schema structure, eIDAS identification and digital signature.
       parameters:
-          - in: query
+          - in: path
             name: userId
+            required: true
             schema:
               type: string
             description: The user ID of the student.
           - in: query
             name: eIDASmds
+            required: true
             schema:
               type: object
             description: The user identification data obtained from the eIDAS minimum data set from the eProcedure Portal.
