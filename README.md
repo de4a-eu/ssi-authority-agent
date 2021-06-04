@@ -10,13 +10,13 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 ## Set environment variables
 
-Before the deployment of SSI Authority Agent, the following environment variable must be set (path: agent/.env):
+Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v0.1/agent/.env`):
 
 -   DOMAIN=INSERT_PUBLIC_DOMAIN_HERE (replace INSERT_PUBLIC_DOMAIN_HERE with your host's public domain name)
 
 ## Make ports public
 
-The following ports must be open (public), so SSI Agents can communicate and exchange messages:
+The following ports must be open (public), so that SSI agents can communicate and exchange messages:
 
 -   8081/tcp
 
@@ -35,9 +35,9 @@ Deployment diagram:
 
 <img src="deployment_diagram.png" alt="Deployment Diagram" width="1000"/>
 
-You can find more details of the container's configuration within the file `agent/docker-compose.yml`
+You can find more details of the container's configuration within the file `v0.1/agent/docker-compose.yml`
 
-The configuration parameters to feed the docker compose is in the file `agent/.env`
+The configuration parameters to feed the docker compose is in the file `v0.1/agent/.env`
 
 > Please review the contents of this configuration file to fit your development, for instance, you can change ports according to your needs.
 
@@ -52,9 +52,9 @@ $cd testing-environment
 $./generate_test_keys.sh
 ```` -->
 
-Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`app.properties`) can be found under `agent/api-java/conf` folder. 
+Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`v0.1/agent/api-java/conf/app.properties`) can be found under `agent/api-java/conf` folder. 
 Since the Authority Agent API communicates with the Aries Go server and the CouchDB database, it is necessary to specify the name of the database where internal status of DID, VC and VP status will be stored along with the credentials for connecting to this database.
-The following entries in `app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
+The following entries in `v0.1/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
 ```bash
 db.ip.address=<INSERT IP adress:port of your database server> (example value: http://couchdb.de4a.eu:5984/)
 db.username=<INSERT DB administrator username>
@@ -122,7 +122,7 @@ Removing network agent_bdd_net        ... done
 ### Testing the SSI Authority Agent deployment
 
 You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) or the Swagger documentation (file `authority-agent-api-v0.2.yml`). 
-If you are using the Swagger file, make sure that you change the Authority Agent server `url` property in the YAML file:
+If you are using the Swagger file, make sure that you change the Authority Agent server `url` property in the YAML file (path `v0.1/authority-agent-api_v0.3.yml`):
 ``` bash
 servers:
   - url: 'http://164.8.250.43:8080/de4a-agent/v1' (to be replaced with your IP address and port on which you run the server)
