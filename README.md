@@ -121,7 +121,7 @@ Removing network agent_bdd_net        ... done
 
 ### Testing the SSI Authority Agent deployment
 
-You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) or the Swagger documentation (file `authority-agent-api-v0.2.yml`). 
+You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) or the Swagger documentation (file `authority-agent-api-v0.3.yml`). 
 If you are using the Swagger file, make sure that you change the Authority Agent server `url` property in the YAML file:
 ``` bash
 servers:
