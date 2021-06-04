@@ -1,0 +1,2 @@
+- Note before the first usage: for the script resetEnvironmentPeriodic_v_0_1.sh to work properly the line "docker-compose rm" (inside the v0.1.6/stop-test-environment.sh) must be changed to the "docker-compose rm -f" 
+- The script is currently set to reset the environment at 1.00 AM.
