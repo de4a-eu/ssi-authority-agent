@@ -27,6 +27,19 @@ services:
         networks:
             - bdd_net
 
+    authority.openapi.de4a.eu:
+        container_name: authority.openapi.de4a.eu
+        image: swaggerapi/swagger-ui
+        environment:
+          - SWAGGER_JSON=../authority-agent-api_v0.3.yml
+          - BASE_URL=/openapi
+        ports:
+          - 8089:8080
+        volumes:
+          - ../:/specs
+        networks:
+          - bdd_net
+
     government.webhook.de4a.eu:
         container_name: ${GOV_WEBHOOK_CONTAINER_NAME}
         image: ${SAMPLE_WEBHOOK_IMAGE}:${SAMPLE_WEBHOOK_IMAGE_TAG}
