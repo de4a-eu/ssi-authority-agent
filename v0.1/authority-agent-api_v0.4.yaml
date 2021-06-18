@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: DE4A Authority Agent
-  version: 0.0.1
+  version: 0.0.2
 servers:
   - url: 'http://164.8.250.43:8080/de4a-agent/v1'
 tags:
@@ -9,11 +9,9 @@ tags:
   - name: DID connection
     description: Operations for managing the DID connections and invitations sent by the Authority Agent.
   - name: verifiable credentials
-    description: Operations for managing verifiable credentials on the DP/DC side.
-  - name: offer
-    description: Operations for managing VC offers sent by the Authority Agent.
+    description: Operations for managing verifiable credentials on the Data Provider side.
   - name: verifiable presentations
-    description: Operations for managing verifiable presentations to be submitted by the student on the DC side.
+    description: Operations for managing verifiable presentations to be submitted by the student on the Data Consumer side.
     
 paths:
   /generate-invitation:
@@ -74,7 +72,7 @@ paths:
   /send-vc-offer:
     post:
       tags:
-        - offer
+        - verifiable credentials
       summary: Generate and send a VC offer to the student's Edge Agent for the student to accept before sending him/her the diploma evidence as a VC.
       requestBody:
         description:  An object including the user ID obtained from eIDAS minimum dataset for the identificaton of a natural person and the diploma evidence in the canonical XML format, which is to be convert to VC JSON-LD format and digitally signed by using the issuer's DID.
@@ -100,34 +98,6 @@ paths:
               schema:
                 type: boolean
                 example: false      
-  /generate-vc:
-    post:
-      tags:
-        - verifiable credentials
-      summary: Generate and sign a verifiable credential for a given student based on the input evidence.
-      requestBody:
-        description:  An object including information about the DIDs of the Authority Agent deployed on the Data Owner side (myDID) and the student's Edge Agent (theirDID), the DID identifier of the DO Authority Agent optionally registered in the EBSI DID registry (TIR) and the diploma evidence in the canonical XML format.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VCData'
-      responses:
-        '200':
-            description: Successfully generated verifiable credential for the student.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/VerifiableCredential'
-                  example: {}
-        '404':
-            description: FAILED
-            content:
-              application/json:
-                  schema:
-                    $ref: '#/components/schemas/Error'
-                    example: {}
-                  
   
   /check-offer-vc-response/{userId}:
     get:
@@ -334,7 +304,32 @@ paths:
             application/json:
               schema:
                 example: {}     
-   
+  /get-vp/{vpName}:
+    get:
+      tags:
+        - verifiable presentations
+      summary: Retrieve the contents of the submitted verifiable presentation.
+      parameters:
+          - in: path
+            name: vpName
+            required: true
+            schema:
+               type: string
+            description: The name of the verifiable presentation received and stored by the Authority Agent.
+      responses:
+        '200':
+          description: An object representing the contents of the VP.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifiablePresentation'
+                
+        '404':
+          description: Empty object
+          content:
+            application/json:
+              schema:
+                example: {}     
          
             
              
@@ -384,22 +379,6 @@ components:
             description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
         evidence:
             type: string
-            
-    VCData:
-      type: object
-      properties:
-        myDID:
-          type: string
-          description: The DID of the Authority Agent deployed on the Data Owner side.
-        theirDID:
-          type: string
-          description: The DID identifier of the student's Edge Agent.
-        publicDID:
-          type: string
-          description: The DID identifier of the DO Authority Agent, which is optionally registered in the EBSI DID registry (TIR).
-        evidence:
-          type: string
-          description: The diploma evidence in the canonical XML format, which is to be converted to VC JSON-LD format and digitally signed by using the issuer's public DID.
           
     VPRequestData:
       type: object
@@ -411,46 +390,93 @@ components:
               type: string
               description: The requested format of the VP.
           
-    Person:
+    CredentialSubject:
       type: object
       properties:
-            id: 
+            currentFamilyName: 
               type: string
-            fullName:
+            currentGivenName:
               type: string
-            achievements:
-              type: array
-              items:
-                type: object
-            activities:
-              type: array
-              items: 
-                type: object
-    Evidence:
+            dateOfBirth:
+              type: string
+            personIdentifier:
+              type: string
+            learningAchievement:
+              type: object
+            learningSpecificationReferences:
+              type: object
+            assessmentReferences:
+              type: object
+            awardingProcessReferences:
+              type: object
+            locationReferences:
+              type: object
+            agentReferences:
+              type: object
+            learningOpportunityReferences:
+              type: object
+          
+    VerifiableCredential:
       type: object
       properties:
         credentialSubject: 
           type: object
-          $ref: '#/components/schemas/Person'
-  
-    VerifiableCredential:
+          $ref: '#/components/schemas/CredentialSubject'
+        issuanceDate:
+          type: string
+        validFrom:
+          type: string
+        expirationDate:
+          type: string
+        id:
+          type: string
+        proof:
+          type: object
+        type:
+          type: array
+          items: 
+            type: string
+        context:
+          type: array
+          items:
+            type: string
+        issuer: 
+          type: string
+    
+    VerifiablePresentation:
       type: object
-      $ref: '#/components/schemas/Evidence' 
-      
+      properties:
+        "@context": 
+          type: array
+          items:
+            type: string
+        holder:
+          type: string
+        id:
+          type: string
+        type:
+          type: array
+          items:
+            type: string
+        verifiableCredential:
+          type: object
+          $ref: '#/components/schemas/VerifiableCredential'
+        
     SchemaValidation:
       type: object
       properties:
           subjectCheck: 
             type: integer
+            
+            example: 1 
           schemaCheck:
             type: integer
+            example: 0
           issuerCheck:
             type: integer
+            example: 0
+          vpName:
+            type: string
+            example :  "vp-user-123456"
       
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-        description: 
-          type: string
+
