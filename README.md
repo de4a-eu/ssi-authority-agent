@@ -4,9 +4,11 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 ## Requirements (installation of tools for Linux)
 
--   Linux server (scripts were not tested on other OSes)
+-   Linux server (scripts were not tested on other OSes).
+-   Git.
 -   Docker (20.10.2): for Debian based installations of Linux (e.g. Ubuntu) installation instructions for Docker can be found [here](https://docs.docker.com/engine/install/ubuntu/) and for Fedora [here](https://docs.docker.com/engine/install/fedora/).
 -   Docker Compose (1.27.4): for Debian distributions installation instructions are [here](https://docs.docker.com/compose/install/) and for Fedora [here](https://docs.docker.com/engine/install/fedora/).
+-   Linux build-essentials (``` sudo apt-get install build-essential ```).
 
 ## Set environment variables
 
@@ -68,6 +70,20 @@ signature.type=Ed25519Signature2018
 ```
 
 Once these basic environment properties are changed, you can proceed to starting the containers.
+
+### Build Docker images
+
+At the moment, Docker images for the Aries agent must be built locally using library ``` aries-framework-go ```. In the later stage of the project, Docker images will be available on the official dockerhub page of the project DE4A (https://hub.docker.com/u/de4a).
+
+```bash
+$git clone https://github.com/hyperledger/aries-framework-go
+$cd aries-framework-go
+$git checkout 2a52bb79077635cffd69021d403a8cdfc3149fe8
+$make agent-rest-docker
+$make sample-webhook-docker
+$cd ..
+```
+
 
 ### Start containers
 
