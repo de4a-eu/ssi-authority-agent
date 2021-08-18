@@ -37,9 +37,9 @@ Deployment diagram:
 
 <img src="deployment_diagram.png" alt="Deployment Diagram" width="1000"/>
 
-You can find more details of the container's configuration within the file `v0.1/agent/docker-compose.yml`
+You can find more details of the container's configuration within the file `v0.2/agent/docker-compose.yml`
 
-The configuration parameters to feed the docker compose is in the file `v0.1/agent/.env`
+The configuration parameters to feed the docker compose is in the file `v0.2/agent/.env`
 
 > Please review the contents of this configuration file to fit your development, for instance, you can change ports according to your needs.
 
@@ -54,9 +54,9 @@ $cd testing-environment
 $./generate_test_keys.sh
 ```` -->
 
-Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`v0.1/agent/api-java/conf/app.properties`) can be found under `agent/api-java/conf` folder. 
+Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`v0.2/agent/api-java/conf/app.properties`) can be found under `v0.2/agent/api-java/conf` folder. 
 Since the Authority Agent API communicates with the Aries Go server and the CouchDB database, it is necessary to specify the name of the database where internal status of DID, VC and VP status will be stored along with the credentials for connecting to this database.
-The following entries in `v0.1/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
+The following entries in `v0.2/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
 ```bash
 db.ip.address=<INSERT IP adress:port of your database server> (example value: http://couchdb.de4a.eu:5984/)
 db.username=<INSERT DB administrator username>
@@ -64,10 +64,18 @@ db.password=<INSERT DB administrator password>
 db.name=<INSERT DB name, which will created when using the Authority Agent automatically> (example value: de4a-authority-agent)
 
 aries.enterprise.ip.address=<INSERT IP address:port of the Aries Go server> (example value: http://de4a.informatika.uni-mb.si:8082/)
-did.key=did:key:z6Mkf3mSeHmehoXVdXQt1uNimKxD9RqFXHS6EgbVaDx4B5Z5 (note: DID key value of the Authority Agent, which is used for signing VC, the generation will be done automatically in future iterations)
 signature.type=Ed25519Signature2018
 
 ```
+
+### EBSI integration and signing Verifiable Credentials
+
+Additionally, the Authority Agent will generate a DID:ebsi on the first startup automatically, which is then used to sign Verifiable Credentials issued by the Trusted Issuer. A generated DID:ebsi imported into the Aries government agent is a pre-condition step for generating VCs.
+This step is automatized by using the EBSI connector, which is a JAR file that can be found under the `v0.2/agent/api-java/webapps` directory. The JAR file is loaded and executed automatically by the Authority Agent once you run the docker compose.  
+The integrated EBSI connector will generate a new DID:ebsi and the necessary keys on the first startup of the Authority Agent, register the DID into the EBSI DID Registry and import the necessary keys into the Aries government agent so that it can sign the VC with the DID:ebsi and check the digital signature during the VC validation.
+To perform these steps, the EBSI connector needs to communicate with EBSI APIs and to establish this communication, it requires a bearer token, whose value is specified in the configuration file (`v0.2/agent/api-java/conf/app.properties`). 
+IMPORTANT: the bearer token needs to be obtained manually from the EBSI website and copied into the configuration file before running the Docker containers! To do this, go to [https://app.preprod.ebsi.eu/users-onboarding/] -> Onboard with Captcha -> Desktop Wallet and copy the session token.
+The obtained token is valid for a limited time (15 minutes), so you need to start the Authority Agent within that period. Otherwise, you will need to repeat the process and obtain a new token.
 
 Once these basic environment properties are changed, you can proceed to starting the containers.
 
@@ -78,7 +86,7 @@ At the moment, Docker images for the Aries agent must be built locally using lib
 ```bash
 $git clone https://github.com/hyperledger/aries-framework-go
 $cd aries-framework-go
-$git checkout 2a52bb79077635cffd69021d403a8cdfc3149fe8
+$git checkout 51105753237576b60d9a9a38ca9bdeff160cbb97
 $make agent-rest-docker
 $make sample-webhook-docker
 $cd ..
@@ -108,6 +116,26 @@ To see the logs of each container, you can use the following command:
 
 ```bash
 $docker logs -f government.agent.api.de4a.eu
+```
+
+Specifically, in the logs of the government.agent.api.de4a.eu container, you will see the output of registering the generated DID to EBSI DID registry. You will see a generated DID:ebsi alongside two other keys needed for the communication with EBSI APIs. As the final result, you should see the status message saying that the onboarding process finished successfully.
+Note: it is possible that the EBSI onboarding won't be successfull on the first try due to occassional problems with APIs, but the EBSI connector is set to keep trying to register the DID until it succeeds.
+
+```bash
+ /////////////////////////
+government.agent.api.de4a.eu  | Authority Agent is initializing.....
+government.agent.api.de4a.eu  | ///////////////////////////////////////////////////////////////////////////
+government.agent.api.de4a.eu  | // Starting the DE4A Initializer
+government.agent.api.de4a.eu  | ///////////////////////////////////////////////////////////////////////////
+government.agent.api.de4a.eu  | WARNING: sun.reflect.Reflection.getCallerClass is not supported. This will impact performance.
+government.agent.api.de4a.eu  | [DB CONNECT] Connected!
+government.agent.api.de4a.eu  | DID directory path: /usr/local/tomcat/data/did
+government.agent.api.de4a.eu  | Received bearer token value: eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2MjkyODAyMTIsImlhdCI6MTYyOTI3OTMxMiwiaXNzIjoiZGlkOmVic2k6NGpQeGNpZ3ZmaWZaeVZ3eW01emp4YUtYR0pUdDdZd0Z0cGc2QVh0c1I0ZDUiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjEtMDgtMThUMDk6MzU6MDhaIiwiaG9zdG5hbWUiOiJhcHAucHJlcHJvZC5lYnNpLmV1Iiwic2NvcmUiOjAuOSwic3VjY2VzcyI6dHJ1ZX19.wB5jG4qgKN9TBIrO3vXY_H1s2rB27rARZtXBW_TOVaAI9nBCwA7dfmBRRembdZp_fyc2Ov9j5YFQ0SsweYaJeQ
+government.agent.api.de4a.eu  | Let's Trust SSI Core 1.0-SNAPSHOT (running on Java 15.0.2+7)
+government.agent.api.de4a.eu  |
+government.agent.api.de4a.eu  | [DE4A EBSI Connector] Issuer Secp256k1 key generated: dd2395e121fa413d88ebd162474b6e63
+government.agent.api.de4a.eu  | [DE4A EBSI Connector] Issuer Ed25519 key generated: 36749a655cd14c93bc87848fc9083c9f
+government.agent.api.de4a.eu  | [DE4A EBSI Connector] DID EBSI created (issuer): did:ebsi:224uBW7hX3fRZ8sh5upjzjXnRzR9tYcf7azX2b5519AUjmMA
 ```
 
 ### Stop containers
