@@ -65,7 +65,7 @@ db.name=<INSERT DB name, which will created when using the Authority Agent autom
 
 aries.enterprise.ip.address=<INSERT IP address:port of the Aries Go server> (example value: http://de4a.informatika.uni-mb.si:8082/)
 signature.type=Ed25519Signature2018
-
+bearer.token=<INSERT session token value obtained from the EBSI onboarding website (steps explained below)>
 ```
 
 ### EBSI integration and signing Verifiable Credentials
