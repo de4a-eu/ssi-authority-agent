@@ -88,6 +88,8 @@ services:
             - ./api-java/webapps/DE4AEBSIConnector-0.1-launcher.jar:/usr/local/tomcat/webapps/DE4AEBSIConnector-0.1-launcher.jar
             - ./api-java/conf/web.xml:/usr/local/tomcat/conf/web.xml
             - ./api-java/conf/app.properties:/usr/local/tomcat/conf/app.properties
+            - ./api-java/conf/service-matrix.properties:/usr/local/tomcat/conf/service-matrix.properties
+
         networks:
             - bdd_net
 volumes:

@@ -22,6 +22,19 @@ The following ports must be open (public), so that SSI agents can communicate an
 
 -   8081/tcp
 
+### Build Docker images
+
+At the moment, Docker images for the Aries agent must be built locally using library ``` aries-framework-go ```. In the later stage of the project, Docker images will be available on the official dockerhub page of the project DE4A (https://hub.docker.com/u/de4a).
+
+```bash
+$git clone https://github.com/hyperledger/aries-framework-go
+$cd aries-framework-go
+$git checkout 51105753237576b60d9a9a38ca9bdeff160cbb97
+$make agent-rest-docker
+$make sample-webhook-docker
+$cd ..
+```
+
 ## Deploy SSI Authority Agent
 
 In the deployment, several Docker containers are started. We have created a docker-compose to set up the whole environment.
@@ -79,19 +92,6 @@ The obtained token is valid for a limited time (15 minutes), so you need to star
 
 Once these basic environment properties are changed, you can proceed to starting the containers.
 
-### Build Docker images
-
-At the moment, Docker images for the Aries agent must be built locally using library ``` aries-framework-go ```. In the later stage of the project, Docker images will be available on the official dockerhub page of the project DE4A (https://hub.docker.com/u/de4a).
-
-```bash
-$git clone https://github.com/hyperledger/aries-framework-go
-$cd aries-framework-go
-$git checkout 51105753237576b60d9a9a38ca9bdeff160cbb97
-$make agent-rest-docker
-$make sample-webhook-docker
-$cd ..
-```
-
 
 ### Start containers
 
@@ -121,22 +121,7 @@ $docker logs -f government.agent.api.de4a.eu
 Specifically, in the logs of the government.agent.api.de4a.eu container, you will see the output of registering the generated DID to EBSI DID registry. You will see a generated DID:ebsi alongside two other keys needed for the communication with EBSI APIs. As the final result, you should see the status message saying that the onboarding process finished successfully.
 Note: it is possible that the EBSI onboarding won't be successfull on the first try due to occassional problems with APIs, but the EBSI connector is set to keep trying to register the DID until it succeeds.
 
-```bash
- /////////////////////////
-government.agent.api.de4a.eu  | Authority Agent is initializing.....
-government.agent.api.de4a.eu  | ///////////////////////////////////////////////////////////////////////////
-government.agent.api.de4a.eu  | // Starting the DE4A Initializer
-government.agent.api.de4a.eu  | ///////////////////////////////////////////////////////////////////////////
-government.agent.api.de4a.eu  | WARNING: sun.reflect.Reflection.getCallerClass is not supported. This will impact performance.
-government.agent.api.de4a.eu  | [DB CONNECT] Connected!
-government.agent.api.de4a.eu  | DID directory path: /usr/local/tomcat/data/did
-government.agent.api.de4a.eu  | Received bearer token value: eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2MjkyODAyMTIsImlhdCI6MTYyOTI3OTMxMiwiaXNzIjoiZGlkOmVic2k6NGpQeGNpZ3ZmaWZaeVZ3eW01emp4YUtYR0pUdDdZd0Z0cGc2QVh0c1I0ZDUiLCJvbmJvYXJkaW5nIjoicmVjYXB0Y2hhIiwidmFsaWRhdGVkSW5mbyI6eyJhY3Rpb24iOiJsb2dpbiIsImNoYWxsZW5nZV90cyI6IjIwMjEtMDgtMThUMDk6MzU6MDhaIiwiaG9zdG5hbWUiOiJhcHAucHJlcHJvZC5lYnNpLmV1Iiwic2NvcmUiOjAuOSwic3VjY2VzcyI6dHJ1ZX19.wB5jG4qgKN9TBIrO3vXY_H1s2rB27rARZtXBW_TOVaAI9nBCwA7dfmBRRembdZp_fyc2Ov9j5YFQ0SsweYaJeQ
-government.agent.api.de4a.eu  | Let's Trust SSI Core 1.0-SNAPSHOT (running on Java 15.0.2+7)
-government.agent.api.de4a.eu  |
-government.agent.api.de4a.eu  | [DE4A EBSI Connector] Issuer Secp256k1 key generated: dd2395e121fa413d88ebd162474b6e63
-government.agent.api.de4a.eu  | [DE4A EBSI Connector] Issuer Ed25519 key generated: 36749a655cd14c93bc87848fc9083c9f
-government.agent.api.de4a.eu  | [DE4A EBSI Connector] DID EBSI created (issuer): did:ebsi:224uBW7hX3fRZ8sh5upjzjXnRzR9tYcf7azX2b5519AUjmMA
-```
+<img src="ebsi-connector-output.png" alt="EBSI Connector output" width="1000"/>
 
 ### Stop containers
 
