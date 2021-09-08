@@ -150,7 +150,7 @@ Removing network agent_bdd_net        ... done
 
 ### Testing the SSI Authority Agent deployment
 
-You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (file `v0.1/authority-agent-api-v0.4.yml`). 
+You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (file `v0.2/authority-agent-api-v0.5.yml`). 
 <!--If you are using the Swagger file, make sure that you change the Authority Agent server `url` property in the YAML file:
 ``` bash
 servers:
@@ -166,7 +166,9 @@ curl -X 'GET' \
   -H 'accept: application/json'
 ```
 
-This request should return `-1`, as there is no DID connection for user ID "LvvPxYsevpdefYV" at the beginning.
+Please note that the Authority Agent accepts only incoming requests via the HTTP protocol at the moment, so the API URL in your curl requests should start with `http://` instead of `https://`.
+
+The above request should return `-1`, as there is no DID connection for user ID "LvvPxYsevpdefYV" at the beginning.
 
 The flow of API requests for the DP side is the following:
 1.  `/generate-invitation`
