@@ -15,6 +15,8 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v0.2/agent/.env`):
 
 -   DOMAIN=INSERT_PUBLIC_DOMAIN_HERE (replace INSERT_PUBLIC_DOMAIN_HERE with your host's public domain name)
+-   COUCHDB_USER=<INSERT_COUCHDB_USER_HERE> (replace <INSERT_COUCHDB_USER_HERE> with database's administrator username)
+-   COUCHDB_PASSWORD=<INSERT_COUCHDB_PASSWORD_HERE> (replace <INSERT_COUCHDB_PASSWORD_HERE> with database's administrator password)
 
 ## Make ports public
 
@@ -44,7 +46,6 @@ Docker Compose file contains the following containers:
 -   Aries Go REST server
 -   A webhook server
 -   CouchDB database server
--   Sideetree container (ledger)
 
 Deployment diagram:
 
@@ -60,7 +61,7 @@ The configuration parameters to feed the docker compose is in the file `v0.2/age
 
 ### Generate Keys
 
-For the actual sake of the development, the use of TLS is disable in the different environment recreated (due problems to connect mobile with a self signed certificate). However there is a script ready to generate the keys used within the different containers deployed. In order to generate it, it is just necessary to run the following command:
+For the actual sake of the development, the use of TLS is disabled in the different environment recreated (due problems to connect mobile with a self signed certificate). However there is a script ready to generate the keys used within the different containers deployed. In order to generate it, it is just necessary to run the following command:
 
 ```bash
 $cd testing-environment
@@ -71,12 +72,12 @@ Once the Aries-related components are configured, it is necessary to adjust the 
 Since the Authority Agent API communicates with the Aries Go server and the CouchDB database, it is necessary to specify the name of the database where internal status of DID, VC and VP status will be stored along with the credentials for connecting to this database.
 The following entries in `v0.2/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
 ```bash
-db.ip.address=<INSERT IP adress:port of your database server> (example value: http://couchdb.de4a.eu:5984/)
+db.ip.address=http://couchdb.de4a.eu:5984/
 db.username=<INSERT DB administrator username>
 db.password=<INSERT DB administrator password>
 db.name=<INSERT DB name, which will created when using the Authority Agent automatically> (example value: de4a-authority-agent)
 
-aries.enterprise.ip.address=<INSERT IP address:port of the Aries Go server> (example value: http://de4a.informatika.uni-mb.si:8082/)
+aries.enterprise.ip.address=<INSERT_PUBLIC_DOMAIN_HERE>:8082/
 signature.type=Ed25519Signature2018
 bearer.token=<INSERT session token value obtained from the EBSI onboarding website (steps explained below)>
 ```
@@ -107,7 +108,6 @@ If everything has gone well, you should be able to see something similar to this
 ```bash
 Creating couchdb.de4a.eu              ... done
 Creating de4a.informatika.uni-mb.si   ... done
-Creating aries.bdd.sidetree.mock      ... done
 Creating government.agent.api.de4a.eu ... done
 Creating government.webhook.de4a.eu   ... done
 ```
@@ -135,12 +135,10 @@ $docker-compose stop
 If everything goes well, you should be able to see the following:
 
 ```bash
-Stopping aries.bdd.sidetree.mock      ... done
 Stopping government.agent.api.de4a.eu ... done
 Stopping government.webhook.de4a.eu   ... done
 Stopping couchdb.de4a.eu              ... done
 Stopping de4a.informatika.uni-mb.si   ... done
-Removing aries.bdd.sidetree.mock      ... done
 Removing government.agent.api.de4a.eu ... done
 Removing government.webhook.de4a.eu   ... done
 Removing couchdb.de4a.eu              ... done
