@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: DE4A Authority Agent
-  version: 0.0.2
+  version: 0.0.3
 servers:
   - url: 'http://164.8.250.43:8080/de4a-agent/v1'
 tags:
@@ -205,7 +205,7 @@ paths:
         - verifiable presentations
       summary: Request the student to submit a verifiable presentation (VP) in a given format.
       requestBody:
-        description:  The data object including the user ID from the eIDAS minimum dataset for the identificaton of a natural person (the value obtained from the eProcedure Portal) and the requested format of the VP.
+        description:  The data object including the user ID from the eIDAS minimum dataset for the identificaton of a natural person (the value obtained from the eProcedure Portal) and the requested format type of the VP (e.g. Verifiable Credential).
         required: true
         content:
           application/json:
@@ -283,12 +283,12 @@ paths:
               type: string
             description: The user ID of the student.
       requestBody:
-        description:  The data object representing the eIDAS minimum dataset for the identificaton of a natural person (the value obtained from the eProcedure Portal).
+        description:  The base64-encoded data object representing the eIDAS minimum dataset for the identificaton of a natural person (the value obtained from the eProcedure Portal).
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EIDASData'
+              $ref: '#/components/schemas/ValidationData'
           
       responses:
         '200':
@@ -341,19 +341,29 @@ components:
         userId: 
           type: string
           description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
-    
+    ValidationData:
+      type: object
+      properties:
+        eidas: 
+          type: string
+          description: The base64-encoded EIDASData object containing eIDAS identification data for a natural person obtained from the eProcedure Portal.
+          $ref: '#/components/schemas/EIDASData'
+          
     EIDASData:
       type: object
       properties:
-        userId: 
+        personIdentifier: 
           type: string
           description: The natural person identifier.
-        birthName:
+        currentGivenName:
           type: string
           description: The firstname of a person.
-        givenName:
+        currentFamilyName:
           type: string
           description: The lastname of a person.
+        dateOfBirth:
+          type: string
+          description: The date of birth of a person formatted as 'yyyy-MM-dd'T'HH:mm:ss.SSSX'.
           
     Invitation:
       type: object
@@ -389,6 +399,7 @@ components:
         presentationFormat:
               type: string
               description: The requested format of the VP.
+              example: VerifiableCredential
           
     CredentialSubject:
       type: object
