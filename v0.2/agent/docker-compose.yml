@@ -62,6 +62,7 @@ services:
             - ./api-java/webapps/de4a-agent.war:/usr/local/tomcat/webapps/de4a-agent.war
             - ./api-java/conf/web.xml:/usr/local/tomcat/conf/web.xml
             - ./api-java/conf/app.properties:/usr/local/tomcat/conf/app.properties
+            - ./api-java/conf/service-matrix.properties:/usr/local/tomcat/conf/service-matrix.properties
         networks:
             - bdd_net
 volumes:

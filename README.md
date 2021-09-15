@@ -14,7 +14,7 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v0.2/agent/.env`):
 
--   DOMAIN=INSERT_PUBLIC_DOMAIN_HERE (replace INSERT_PUBLIC_DOMAIN_HERE with your host's public domain name)
+-   DOMAIN=<INSERT_PUBLIC_DOMAIN_HERE> (replace <INSERT_PUBLIC_DOMAIN_HERE> with your host's public domain name)
 -   COUCHDB_USER=<INSERT_COUCHDB_USER_HERE> (replace <INSERT_COUCHDB_USER_HERE> with database's administrator username)
 -   COUCHDB_PASSWORD=<INSERT_COUCHDB_PASSWORD_HERE> (replace <INSERT_COUCHDB_PASSWORD_HERE> with database's administrator password)
 
@@ -27,6 +27,7 @@ The following ports must be open (public), so that SSI agents can communicate an
 ### Build Docker images
 
 At the moment, Docker images for the Aries agent must be built locally using library ``` aries-framework-go ```. In the later stage of the project, Docker images will be available on the official dockerhub page of the project DE4A (https://hub.docker.com/u/de4a).
+Note: you may need superuser system privileges to execute bash commands.
 
 ```bash
 $git clone https://github.com/hyperledger/aries-framework-go
@@ -76,11 +77,13 @@ db.ip.address=http://couchdb.de4a.eu:5984/
 db.username=<INSERT DB administrator username>
 db.password=<INSERT DB administrator password>
 db.name=<INSERT DB name, which will created when using the Authority Agent automatically> (example value: de4a-authority-agent)
-
+alias=<INSERT ORGANIZATION ALIAS NAME> (example value: MIZSSlovenia)
 aries.enterprise.ip.address=<INSERT_PUBLIC_DOMAIN_HERE>:8082/
 signature.type=Ed25519Signature2018
 bearer.token=<INSERT session token value obtained from the EBSI onboarding website (steps explained below)>
 ```
+
+Note that the `alias` property is needed when generating DID connection invitations to students in order to display the shortened name of the organization sending an invitation to the student.
 
 ### EBSI integration and signing Verifiable Credentials
 
@@ -149,12 +152,7 @@ Removing network agent_bdd_net        ... done
 ### Testing the SSI Authority Agent deployment
 
 You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (file `v0.2/authority-agent-api-v0.6.yml`). 
-<!--If you are using the Swagger file, make sure that you change the Authority Agent server `url` property in the YAML file:
-``` bash
-servers:
-  - url: 'http://164.8.250.43:8080/de4a-agent/v1' (to be replaced with your IP address and port on which you run the server)
-```
--->
+
 You can test if the Authority Agent is working properly by checking the current DID connection status for a random user ID (note: replace IP ADDRESS:PORT with your Authority Agent server address). 
 The following request is made:
 
@@ -171,16 +169,16 @@ The above request should return `-1`, as there is no DID connection for user ID 
 The flow of API requests for the DP side is the following:
 1.  `/generate-invitation`
 2.  `/did-conn-status/{userId}`
-3.  `/send-vc-offer` (requires generating a DID of the Authority Agent as a pre-condition, will be updated)
-4.  `/check-offer-vc-response/{userId}` (requires generating a DID of the Authority Agent as a pre-condition, will be updated)
-5.  `/send-vc` (requires generating a DID of the Authority Agent as a pre-condition, will be updated)
+3.  `/send-vc-offer` 
+4.  `/check-offer-vc-response/{userId}` 
+5.  `/send-vc` 
 
 The flow of API requests for the DC side is the following:
 1.  `/generate-invitation`
 2.  `/did-conn-status/{userId}`
 3.  `/send-vp-request` 
 4.  `/check-request-vp-response/{userId}`
-5.  `/validate-vp/{userId}` (requires EBSI integration, will be updated)
+5.  `/validate-vp/{userId}` 
 
 <!-- Document is comprised as follows:
 
