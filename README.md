@@ -12,7 +12,7 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 ## Set environment variables
 
-Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v0.2/agent/.env`):
+Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v0.3/agent/.env`):
 
 -   DOMAIN=<INSERT_PUBLIC_DOMAIN_HERE> (replace <INSERT_PUBLIC_DOMAIN_HERE> with your host's public domain name)
 -   COUCHDB_USER=<INSERT_COUCHDB_USER_HERE> (replace <INSERT_COUCHDB_USER_HERE> with database's administrator username)
@@ -23,20 +23,6 @@ Before the deployment of SSI Authority Agent, the following environment variable
 The following ports must be open (public), so that SSI agents can communicate and exchange messages:
 
 -   8081/tcp
-
-### Build Docker images
-
-At the moment, Docker images for the Aries agent must be built locally using library ``` aries-framework-go ```. In the later stage of the project, Docker images will be available on the official dockerhub page of the project DE4A (https://hub.docker.com/u/de4a).
-Note: you may need superuser system privileges to execute bash commands.
-
-```bash
-$git clone https://github.com/hyperledger/aries-framework-go
-$cd aries-framework-go
-$git checkout 51105753237576b60d9a9a38ca9bdeff160cbb97
-$make agent-rest-docker
-$make sample-webhook-docker
-$cd ..
-```
 
 ## Deploy SSI Authority Agent
 
@@ -52,9 +38,9 @@ Deployment diagram:
 
 <img src="deployment_diagram.png" alt="Deployment Diagram" width="1000"/>
 
-You can find more details of the container's configuration within the file `v0.2/agent/docker-compose.yml`
+You can find more details of the container's configuration within the file `v0.3/agent/docker-compose.yml`
 
-The configuration parameters to feed the docker compose is in the file `v0.2/agent/.env`
+The configuration parameters to feed the docker compose is in the file `v0.3/agent/.env`
 
 > Please review the contents of this configuration file to fit your development, for instance, you can change ports according to your needs.
 
@@ -69,9 +55,9 @@ $cd testing-environment
 $./generate_test_keys.sh
 ```` -->
 
-Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`v0.2/agent/api-java/conf/app.properties`) can be found under `v0.2/agent/api-java/conf` folder. 
+Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`app.properties`) can be found under `v0.3/agent/api-java/conf` folder. 
 Since the Authority Agent API communicates with the Aries Go server and the CouchDB database, it is necessary to specify the name of the database where internal status of DID, VC and VP status will be stored along with the credentials for connecting to this database.
-The following entries in `v0.2/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
+The following entries in `v0.3/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
 ```bash
 db.ip.address=http://couchdb.de4a.eu:5984/
 db.username=<INSERT DB administrator username>
@@ -87,10 +73,10 @@ Note that the `alias` property is needed when generating DID connection invitati
 
 ### EBSI integration and signing Verifiable Credentials
 
-Additionally, the Authority Agent will generate a DID:ebsi on the first startup automatically, which is then used to sign Verifiable Credentials issued by the Trusted Issuer. A generated DID:ebsi imported into the Aries government agent is a pre-condition step for generating VCs.
-This step is automatized by using the EBSI connector, which is a JAR file that can be found under the `v0.2/agent/api-java/webapps` directory. The JAR file is loaded and executed automatically by the Authority Agent once you run the docker compose.  
+The Authority Agent will generate a DID:ebsi on the first startup automatically, which is then used to sign Verifiable Credentials issued by the Trusted Issuer. A generated DID:ebsi imported into the Aries government agent is a pre-condition step for generating VCs.
+This step is automatized by using the EBSI connector integrated into the Authority Agent. The EBSI Connector is executed automatically by the Authority Agent once you run the docker compose.  
 The integrated EBSI connector will generate a new DID:ebsi and the necessary keys on the first startup of the Authority Agent, register the DID into the EBSI DID Registry and import the necessary keys into the Aries government agent so that it can sign the VC with the DID:ebsi and check the digital signature during the VC validation.
-To perform these steps, the EBSI connector needs to communicate with EBSI APIs and to establish this communication, it requires a bearer token, whose value is specified in the configuration file (`v0.2/agent/api-java/conf/app.properties`). 
+To perform these steps, the EBSI connector needs to communicate with EBSI APIs and to establish this communication, it requires a bearer token, whose value is specified in the configuration file before starting the Docker containers (`v0.3/agent/api-java/conf/app.properties`). 
 IMPORTANT: the bearer token needs to be obtained manually from the EBSI website and copied into the configuration file before running the Docker containers! To do this, go to [https://app.preprod.ebsi.eu/users-onboarding/] -> Onboard with Captcha -> Desktop Wallet and copy the session token.
 The obtained token is valid for a limited time (15 minutes), so you need to start the Authority Agent within that period. Otherwise, you will need to repeat the process and obtain a new token.
 
@@ -115,7 +101,34 @@ Creating government.agent.api.de4a.eu ... done
 Creating government.webhook.de4a.eu   ... done
 ```
 
-To see the logs of each container, you can use the following command:
+### SSI Authority Agent logging
+
+In `v0.3`, the logging functionality of the Authority Agent has been externalized to correspond to the pilot metrics and remove sensitive data from the output. Specifically, the `government.agent.api.de4a.eu` Docker service representing the Authority Agent API logs events and error in `/usr/local/tomcat/logs/de4a-metrics-log.txt` file in the Docker container.
+To access the contents of that file, you need to enter the command line of the Docker container by executing the following line (once the containers are running):
+
+```
+docker exec -it government.agent.api.de4a.eu /bin/bash
+cd ..
+cd logs
+cat de4a-metrics-log.txt
+```
+
+If the EBSI Connector successfully executed all steps, you should see the following lines at the beginning of the `de4a-metrics-log.txt` logs file:
+```
+DE4A METRICS - [2021-09-16 06:43:11.359] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01006] [EBSI-CONNECTOR] Established connection with internal database.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01013] [EBSI-CONNECTOR] Successfully read EBSI bearer token value.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01014] [EBSI-CONNECTOR] Successfully created files for EBSI integration.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01014] [EBSI-CONNECTOR] Successfully generated Secp256k1 key.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01015] [EBSI-CONNECTOR] Successfully generated Ed25519 key.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01015] [EBSI-CONNECTOR] Successfully generated DID.
+DE4A METRICS - [2021-09-16 06:43:11.357] [SEVERE] [EBSI Connector] [1.3] [Authority Agent] [1016] Error onboarding organization into EBSI Trusted Issuer Registry.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01016] [EBSI-CONNECTOR] Successfully onboarded organization into EBSI Trusted Issuer Registry.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01017] [EBSI-CONNECTOR] Successfully exported JWK private key.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01006] Stored current state in the Authority Agent database.
+DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01008] [EBSI-CONNECTOR] Successfully imported DID document into Aries.
+```
+
+To see the logs of each container printed in the console, you can also use the following command:
 
 ```bash
 $docker logs -f government.agent.api.de4a.eu
@@ -124,7 +137,6 @@ $docker logs -f government.agent.api.de4a.eu
 Specifically, in the logs of the government.agent.api.de4a.eu container, you will see the output of registering the generated DID to EBSI DID registry. You will see a generated DID:ebsi alongside two other keys needed for the communication with EBSI APIs. As the final result, you should see the status message saying that the onboarding process finished successfully.
 Note: it is possible that the EBSI onboarding won't be successfull on the first try due to occassional problems with APIs, but the EBSI connector is set to keep trying to register the DID until it succeeds.
 
-<img src="ebsi-connector-output.png" alt="EBSI Connector output" width="1000"/>
 
 ### Stop containers
 
@@ -151,20 +163,20 @@ Removing network agent_bdd_net        ... done
 
 ### Testing the SSI Authority Agent deployment
 
-You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (file `v0.2/authority-agent-api-v0.6.yml`). 
+You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (pre-condition: change the server IP address in file `v0.3/authority-agent-api-v0.6.yml`). 
 
 You can test if the Authority Agent is working properly by checking the current DID connection status for a random user ID (note: replace IP ADDRESS:PORT with your Authority Agent server address). 
 The following request is made:
 
 ``` bash
 curl -X 'GET' \
-  'http://<IP ADDRESS:PORT>/de4a-agent/v1/did-conn-status/LvvPxYsevpdefYV' \
+  'http://<IP ADDRESS:PORT>/v1/did-conn-status/alice' \
   -H 'accept: application/json'
 ```
 
 Please note that the Authority Agent accepts only incoming requests via the HTTP protocol at the moment, so the API URL in your curl requests should start with `http://` instead of `https://`.
 
-The above request should return `-1`, as there is no DID connection for user ID "LvvPxYsevpdefYV" at the beginning.
+The above request should return `-1`, as there is no DID connection for user ID "alice" at the beginning.
 
 The flow of API requests for the DP side is the following:
 1.  `/generate-invitation`
@@ -229,4 +241,3 @@ docker load < aries_0_1_6.tar
 # Future
 
 -   add HTTPS support -->
-

@@ -1,0 +1,496 @@
+openapi: 3.0.0
+info:
+  title: DE4A Authority Agent
+  version: 0.0.3
+servers:
+  - url: 'http://<INSERT_SERVER_IP_ADDRESS>:8080/v1'
+tags:
+   
+  - name: DID connection
+    description: Operations for managing the DID connections and invitations sent by the Authority Agent.
+  - name: verifiable credentials
+    description: Operations for managing verifiable credentials on the Data Provider side.
+  - name: verifiable presentations
+    description: Operations for managing verifiable presentations to be submitted by the student on the Data Consumer side.
+    
+paths:
+  /generate-invitation:
+    post:
+      tags:
+        - DID connection
+      summary: Generate DID invitation for establishing a DID communication between the Authority Agent and the student's Edge Agent.
+      requestBody:
+        description: The user data obtained from the eProcedure Portal.
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserData'
+      responses:
+        '200':
+          description: The DID invitation JSON value based on which a QR code on the eProcedure Portal should be generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+              example:
+                  {"serviceEndpoint":"http://alice.aries.example.com:8081","recipientKeys":["did:key:z6MkeUtPN4jBEJ97PrGV5EtgqM9KfbWoFNxeXzHLSEz4EJAp"],"@id":"af62fe2f-d554-46dc-8700-1d92813abab4","label":"alice-agent","@type":"https://didcomm.org/didexchange/1.0/invitation"}
+  /did-conn-status/{userId}:
+    get:
+      tags:
+        - DID connection
+      summary: Retrieve the current status of the DID connection between the Authority Agent and the student's Edge Agent.
+      parameters:
+          - in: path
+            name: userId
+            required: true
+            schema:
+              type: string
+            description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
+      responses:
+        '200':
+          description: The connection has already been established.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 1
+        '300':
+          description: The invitation has been generated, but there is still no response from the student.
+          content:
+            application/json:
+              schema:
+                type: integer   
+                example: 0
+        '400':
+          description: The invitation has never been generated. 
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: -1
+  /send-vc-offer:
+    post:
+      tags:
+        - verifiable credentials
+      summary: Generate and send a VC offer to the student's Edge Agent for the student to accept before sending him/her the diploma evidence as a VC.
+      requestBody:
+        description:  An object including the user ID obtained from eIDAS minimum dataset for the identificaton of a natural person and the diploma evidence in the canonical XML format, which is to be convert to VC JSON-LD format and digitally signed by using the issuer's DID.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferData'
+      
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+       
+        '404':
+          description: FAILED
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false      
+  
+  /check-offer-vc-response/{userId}:
+    get:
+      tags:
+        - verifiable credentials
+      summary: Check the current status of the student's response to the VC or offer sent by the Authority Agent.
+      parameters:
+          - in: path
+            name: userId
+            required: true
+            schema:
+               type: string
+            description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
+      responses:
+        '200':
+          description: The VC has been accepted by the student.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 5
+        '301':                                                      
+          description: The VC has been sent to the student, but has not yet been accepted.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 2  
+        '302':
+          description: The offer has been accepted by the student, but the VC was never sent.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: -3 
+        '303':
+          description: The offer has been accepted by the student.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 1 
+        '401':                                                      
+          description: The offer has been sent to the student, but has not yet been accepted.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 0  
+        '402':
+          description: The offer has not been sent to the student.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: -1
+        '501':
+          description: The offer has been rejected by the student.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: -2   
+        '502':
+          description: The VC has been rejected by the student.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: -4 
+                
+  /send-vc/:
+    post:
+      tags:
+        - verifiable credentials
+      summary: Send a digitally signed verifiable credential to the student after the offer was accepted.
+      requestBody:
+        description:  The user data obtained from the eProcedure Portal.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+        
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+       
+        '404':
+          description: FAILED
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        
+  /send-vp-request:
+    post:
+      tags:
+        - verifiable presentations
+      summary: Request the student to submit a verifiable presentation (VP) in a given format.
+      requestBody:
+        description:  The data object including the user ID from the eIDAS minimum dataset for the identificaton of a natural person (the value obtained from the eProcedure Portal) and the requested format type of the VP (e.g. Verifiable Credential).
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VPRequestData'
+     
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        '404':
+          description: FAILED
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false     
+   
+  /check-request-vp-response/{userId}:
+    get:
+      tags:
+        - verifiable presentations
+      summary: Retrieve the current status of the VP submission or request for VP.
+      parameters:
+          - in: path
+            name: userId
+            required: true
+            schema:
+               type: string
+            description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
+      responses:
+        '200':
+          description: The VP has been received.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 1
+        '301':                                                      
+          description: The VP request has been sent to the student, but has not yet been accepted.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 0  
+        '401':
+          description: The VP request has not been sent to the student.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: -1
+        '402':
+          description: The VP request has been rejected by the student.
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: -2   
+         
+  /validate-vp/{userId}:
+    post:
+      tags:
+        - verifiable presentations
+      summary: Validate the validity of the submitted verifiable presentation with regards to its schema structure, eIDAS identification and digital signature.
+      parameters:
+          - in: path
+            name: userId
+            required: true
+            schema:
+              type: string
+            description: The user ID of the student.
+      requestBody:
+        description:  The base64-encoded data object representing the eIDAS minimum dataset for the identificaton of a natural person (the value obtained from the eProcedure Portal).
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationData'
+          
+      responses:
+        '200':
+          description: An object containing the results of the validation of each VP element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaValidation'
+                
+        '404':
+          description: Empty object
+          content:
+            application/json:
+              schema:
+                example: {}     
+  /get-vp/{vpName}:
+    get:
+      tags:
+        - verifiable presentations
+      summary: Retrieve the contents of the submitted verifiable presentation.
+      parameters:
+          - in: path
+            name: vpName
+            required: true
+            schema:
+               type: string
+            description: The name of the verifiable presentation received and stored by the Authority Agent.
+      responses:
+        '200':
+          description: An object representing the contents of the VP.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifiablePresentation'
+                
+        '404':
+          description: Empty object
+          content:
+            application/json:
+              schema:
+                example: {}     
+         
+            
+             
+components:
+  schemas:
+    UserData:
+      type: object
+      properties:
+        userId: 
+          type: string
+          description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
+    ValidationData:
+      type: object
+      properties:
+        eidas: 
+          type: string
+          description: The base64-encoded EIDASData object containing eIDAS identification data for a natural person obtained from the eProcedure Portal.
+          $ref: '#/components/schemas/EIDASData'
+          
+    EIDASData:
+      type: object
+      properties:
+        personIdentifier: 
+          type: string
+          description: The natural person identifier.
+        currentGivenName:
+          type: string
+          description: The firstname of a person.
+        currentFamilyName:
+          type: string
+          description: The lastname of a person.
+        dateOfBirth:
+          type: string
+          description: The date of birth of a person formatted as 'yyyy-MM-dd'T'HH:mm:ss.SSSX'.
+          
+    Invitation:
+      type: object
+      properties:
+        id:
+          type: string
+        serviceEndpoint: 
+          type: string
+        recipientKeys: 
+          type: array
+          items: 
+            type: string
+        label: 
+          type: string
+        type:
+          type: string
+          
+    OfferData:
+      type: object
+      properties:
+        userId:
+            type: string
+            description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
+        evidence:
+            type: string
+          
+    VPRequestData:
+      type: object
+      properties:
+        userId:
+            type: string
+            description: The user ID included in the eIDAS minimum dataset for the identificaton of a natural person. The value is obtained from the eProcedure Portal.
+        presentationFormat:
+              type: string
+              description: The requested format of the VP.
+              example: VerifiableCredential
+          
+    CredentialSubject:
+      type: object
+      properties:
+            currentFamilyName: 
+              type: string
+            currentGivenName:
+              type: string
+            dateOfBirth:
+              type: string
+            personIdentifier:
+              type: string
+            learningAchievement:
+              type: object
+            learningSpecificationReferences:
+              type: object
+            assessmentReferences:
+              type: object
+            awardingProcessReferences:
+              type: object
+            locationReferences:
+              type: object
+            agentReferences:
+              type: object
+            learningOpportunityReferences:
+              type: object
+          
+    VerifiableCredential:
+      type: object
+      properties:
+        credentialSubject: 
+          type: object
+          $ref: '#/components/schemas/CredentialSubject'
+        issuanceDate:
+          type: string
+        validFrom:
+          type: string
+        expirationDate:
+          type: string
+        id:
+          type: string
+        proof:
+          type: object
+        type:
+          type: array
+          items: 
+            type: string
+        context:
+          type: array
+          items:
+            type: string
+        issuer: 
+          type: string
+    
+    VerifiablePresentation:
+      type: object
+      properties:
+        "@context": 
+          type: array
+          items:
+            type: string
+        holder:
+          type: string
+        id:
+          type: string
+        type:
+          type: array
+          items:
+            type: string
+        verifiableCredential:
+          type: object
+          $ref: '#/components/schemas/VerifiableCredential'
+        
+    SchemaValidation:
+      type: object
+      properties:
+          subjectCheck: 
+            type: integer
+            
+            example: 1 
+          schemaCheck:
+            type: integer
+            example: 0
+          issuerCheck:
+            type: integer
+            example: 0
+          signatureCheck:
+            type: integer
+            example: 0
+          vpName:
+            type: string
+            example :  "vp-user-123456"
+      
+
