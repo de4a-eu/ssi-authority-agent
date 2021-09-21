@@ -6,7 +6,7 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 -   Linux server (scripts were not tested on other OSes).
 -   Git.
--   Docker (20.10.2): for Debian based installations of Linux (e.g. Ubuntu) installation instructions for Docker can be found [here](https://docs.docker.com/engine/install/ubuntu/) and for Fedora [here](https://docs.docker.com/engine/install/fedora/).
+-   Docker (20.10.2): for Debian based installations of Linux (e.g. Ubuntu) installation instructions for Docker can be found [here](https://docs.docker.com/engine/install/ubuntu/) and for Fedora [here](https://docs.docker.com/engine/install/fedora/). **Note**: make sure the user is in the docker group (no sudo required for docker command), instructions can be found [here](https://docs.docker.com/engine/install/linux-postinstall/).
 -   Docker Compose (1.27.4): for Debian distributions installation instructions are [here](https://docs.docker.com/compose/install/) and for Fedora [here](https://docs.docker.com/engine/install/fedora/).
 -   Linux build-essentials (``` sudo apt-get install build-essential ```).
 
