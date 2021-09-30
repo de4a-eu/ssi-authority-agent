@@ -3,7 +3,7 @@ info:
   title: DE4A Authority Agent
   version: 0.0.3
 servers:
-  - url: 'http://<INSERT_SERVER_IP_ADDRESS>:8080/v1'
+  - url: 'http://164.8.250.43:8080/v1'
 tags:
    
   - name: DID connection
@@ -32,9 +32,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invitation'
+                $ref: '#/components/schemas/GeneratedInvitation'
               example:
-                  {"serviceEndpoint":"http://alice.aries.example.com:8081","recipientKeys":["did:key:z6MkeUtPN4jBEJ97PrGV5EtgqM9KfbWoFNxeXzHLSEz4EJAp"],"@id":"af62fe2f-d554-46dc-8700-1d92813abab4","label":"alice-agent","@type":"https://didcomm.org/didexchange/1.0/invitation"}
+                  {
+    "invitation": {
+        "recipientKeys": [
+            "did:key:z6Mkmb81YqYAGw5Nf9ZfkZv2EMmdcD4RrR8ATYaUVQGegoQ3"
+        ],
+        "@type": "https://didcomm.org/didexchange/1.0/invitation",
+        "serviceEndpoint": "http://de4a.informatika.uni-mb.si:8081",
+        "@id": "9554d191-f2a8-4730-be48-73c3d0aed2f1",
+        "label": "goverment-agent"
+    },
+    "alias": "MIZSSlovenia",
+    "invitation_url": ""
+}
   /did-conn-status/{userId}:
     get:
       tags:
@@ -346,11 +358,13 @@ components:
       properties:
         eidas: 
           type: string
-          description: The base64-encoded EIDASData object containing eIDAS identification data for a natural person obtained from the eProcedure Portal.
-          $ref: '#/components/schemas/EIDASData'
+          description: The base64-encoded EIDASData object value containing eIDAS identification data for a natural person obtained from the eProcedure Portal.
+          example: "ewogICAgInBlcnNvbklkZW50aWZpZXIiOiAiMTIzNDU2Nzg5IiwKICAgICJjdXJyZW50R2l2ZW5OYW1lIjogIm1hcmpldGEiLAogICAgImN1cnJlbnRGYW1pbHlOYW1lIjogIkFsdmVzIiwKICAgICJkYXRlT2ZCaXJ0aCI6ICIxOTk3LTAxLTAxVDAwOjAwOjAwLjAwMFoiCn0="
+         
           
     EIDASData:
       type: object
+      
       properties:
         personIdentifier: 
           type: string
@@ -368,7 +382,8 @@ components:
     Invitation:
       type: object
       properties:
-        id:
+      
+        "@id":
           type: string
         serviceEndpoint: 
           type: string
@@ -378,9 +393,20 @@ components:
             type: string
         label: 
           type: string
-        type:
+        "@type":
           type: string
-          
+    
+    GeneratedInvitation:
+      type: object
+      properties:
+        invitation:
+          type: object
+          $ref: '#/components/schemas/Invitation'
+        alias:
+          type: string
+        "invitation_url":
+          type: string
+    
     OfferData:
       type: object
       properties:
