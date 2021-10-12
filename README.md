@@ -12,7 +12,7 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 ## Set environment variables
 
-Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v0.3/agent/.env`):
+Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v01.0/agent/.env`):
 
 -   DOMAIN=<INSERT_PUBLIC_DOMAIN_HERE> (replace <INSERT_PUBLIC_DOMAIN_HERE> with your host's public domain name)
 -   COUCHDB_USER=<INSERT_COUCHDB_USER_HERE> (replace <INSERT_COUCHDB_USER_HERE> with database's administrator username)
@@ -38,9 +38,9 @@ Deployment diagram:
 
 <img src="deployment_diagram.png" alt="Deployment Diagram" width="1000"/>
 
-You can find more details of the container's configuration within the file `v0.3/agent/docker-compose.yml`
+You can find more details of the container's configuration within the file `v1.0/agent/docker-compose.yml`.
 
-The configuration parameters to feed the docker compose is in the file `v0.3/agent/.env`
+The configuration parameters to feed the docker compose is in the file `v1.0/agent/.env`.
 
 > Please review the contents of this configuration file to fit your development, for instance, you can change ports according to your needs.
 
@@ -55,9 +55,9 @@ $cd testing-environment
 $./generate_test_keys.sh
 ```` -->
 
-Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`app.properties`) can be found under `v0.3/agent/api-java/conf` folder. 
+Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`app.properties`) can be found under `v1.0/agent/api-java/conf` folder. 
 Since the Authority Agent API communicates with the Aries Go server and the CouchDB database, it is necessary to specify the name of the database where internal status of DID, VC and VP status will be stored along with the credentials for connecting to this database.
-The following entries in `v0.3/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
+The following entries in `v1.0/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
 ```bash
 db.ip.address=http://couchdb.de4a.eu:5984/
 db.username=<INSERT DB administrator username>
@@ -82,6 +82,8 @@ The obtained token is valid for a limited time (15 minutes), so you need to star
 
 Once these basic environment properties are changed, you can proceed to starting the containers.
 
+'''Important''': To successfully validate the verifiable credentials issued by your organization, you will need to register your organization as a Trusted Issuer into the EBSI TIR Registry. For this step, you will need to contact the EBSI Service Desk team via email and request them to manually register your organization into the TIR registry.
+Contact information for the Service Desk can be found at [here](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/EBSI+Service+Desk). In your request email, you will need to include the information about the DID:ebsi value, which is generated for your organization by the SSI Authority Agent on startup. The value can be retrieved directly by calling the `/get-did-ebsi` method in the AA API.
 
 ### Start containers
 
@@ -103,7 +105,7 @@ Creating government.webhook.de4a.eu   ... done
 
 ### SSI Authority Agent logging
 
-In `v0.3`, the logging functionality of the Authority Agent has been externalized to correspond to the pilot metrics and remove sensitive data from the output. Specifically, the `government.agent.api.de4a.eu` Docker service representing the Authority Agent API logs events and error in `/usr/local/tomcat/logs/de4a-metrics-log.txt` file in the Docker container.
+The logging functionality of the Authority Agent has been externalized to correspond to the pilot metrics and remove sensitive data from the output. Specifically, the `government.agent.api.de4a.eu` Docker service representing the Authority Agent API logs events and error in `/usr/local/tomcat/logs/de4a-metrics-log.txt` file in the Docker container.
 To access the contents of that file, you need to enter the command line of the Docker container by executing the following line (once the containers are running):
 
 ```
@@ -163,7 +165,7 @@ Removing network agent_bdd_net        ... done
 
 ### Testing the SSI Authority Agent deployment
 
-You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (pre-condition: change the server IP address in file `v0.3/authority-agent-api-v0.6.yml`). 
+You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (pre-condition: change the server IP address in file `v1.0/authority-agent-api_v1.0.yml`). 
 
 You can test if the Authority Agent is working properly by checking the current DID connection status for a random user ID (note: replace IP ADDRESS:PORT with your Authority Agent server address). 
 The following request is made:
