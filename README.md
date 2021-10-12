@@ -12,7 +12,7 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 ## Set environment variables
 
-Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v01.0/agent/.env`):
+Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v1.0/agent/.env`):
 
 -   DOMAIN=<INSERT_PUBLIC_DOMAIN_HERE> (replace <INSERT_PUBLIC_DOMAIN_HERE> with your host's public domain name)
 -   COUCHDB_USER=<INSERT_COUCHDB_USER_HERE> (replace <INSERT_COUCHDB_USER_HERE> with database's administrator username)
@@ -82,7 +82,7 @@ The obtained token is valid for a limited time (15 minutes), so you need to star
 
 Once these basic environment properties are changed, you can proceed to starting the containers.
 
-'''Important''': To successfully validate the verifiable credentials issued by your organization, you will need to register your organization as a Trusted Issuer into the EBSI TIR Registry. For this step, you will need to contact the EBSI Service Desk team via email and request them to manually register your organization into the TIR registry.
+**Important additional step in the v1.0 release**: To successfully validate the verifiable credentials issued by your organization, you will need to register your organization as a Trusted Issuer into the EBSI TIR Registry. For this step, you will need to contact the EBSI Service Desk team via email and request them to manually register your organization into the TIR registry.
 Contact information for the Service Desk can be found at [here](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/EBSI+Service+Desk). In your request email, you will need to include the information about the DID:ebsi value, which is generated for your organization by the SSI Authority Agent on startup. The value can be retrieved directly by calling the `/get-did-ebsi` method in the AA API.
 
 ### Start containers
