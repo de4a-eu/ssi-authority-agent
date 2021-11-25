@@ -12,7 +12,7 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 ## Set environment variables
 
-Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v01.0/agent/.env`):
+Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v1.0/agent/.env`):
 
 -   DOMAIN=<INSERT_PUBLIC_DOMAIN_HERE> (replace <INSERT_PUBLIC_DOMAIN_HERE> with your host's public domain name)
 -   COUCHDB_USER=<INSERT_COUCHDB_USER_HERE> (replace <INSERT_COUCHDB_USER_HERE> with database's administrator username)
@@ -76,13 +76,13 @@ Note that the `alias` property is needed when generating DID connection invitati
 The Authority Agent will generate a DID:ebsi on the first startup automatically, which is then used to sign Verifiable Credentials issued by the Trusted Issuer. A generated DID:ebsi imported into the Aries government agent is a pre-condition step for generating VCs.
 This step is automatized by using the EBSI connector integrated into the Authority Agent. The EBSI Connector is executed automatically by the Authority Agent once you run the docker compose.  
 The integrated EBSI connector will generate a new DID:ebsi and the necessary keys on the first startup of the Authority Agent, register the DID into the EBSI DID Registry and import the necessary keys into the Aries government agent so that it can sign the VC with the DID:ebsi and check the digital signature during the VC validation.
-To perform these steps, the EBSI connector needs to communicate with EBSI APIs and to establish this communication, it requires a bearer token, whose value is specified in the configuration file before starting the Docker containers (`v0.3/agent/api-java/conf/app.properties`). 
+To perform these steps, the EBSI connector needs to communicate with EBSI APIs and to establish this communication, it requires a bearer token, whose value is specified in the configuration file before starting the Docker containers (`v1.0/agent/api-java/conf/app.properties`). 
 IMPORTANT: the bearer token needs to be obtained manually from the EBSI website and copied into the configuration file before running the Docker containers! To do this, go to [https://app.preprod.ebsi.eu/users-onboarding/] -> Onboard with Captcha -> Desktop Wallet and copy the session token.
 The obtained token is valid for a limited time (15 minutes), so you need to start the Authority Agent within that period. Otherwise, you will need to repeat the process and obtain a new token.
 
 Once these basic environment properties are changed, you can proceed to starting the containers.
 
-'''Important''': To successfully validate the verifiable credentials issued by your organization, you will need to register your organization as a Trusted Issuer into the EBSI TIR Registry. For this step, you will need to contact the EBSI Service Desk team via email and request them to manually register your organization into the TIR registry.
+**Important additional step in the v1.0 release**: To successfully validate the verifiable credentials issued by your organization, you will need to register your organization as a Trusted Issuer into the EBSI TIR Registry. For this step, you will need to contact the EBSI Service Desk team via email and request them to manually register your organization into the TIR registry.
 Contact information for the Service Desk can be found at [here](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/EBSI+Service+Desk). In your request email, you will need to include the information about the DID:ebsi value, which is generated for your organization by the SSI Authority Agent on startup. The value can be retrieved directly by calling the `/get-did-ebsi` method in the AA API.
 
 ### Start containers
