@@ -59,10 +59,12 @@ services:
             - 0.0.0.0:${AGENT_API_PORT}:8080
         volumes:
             - ./api-java/conf/app.properties:/usr/local/tomcat/conf/app.properties
+            - ./api-java/data:/usr/local/tomcat/webapps/data
         depends_on:
             - couchdb.de4a.eu 
         networks:
             - de4a_net
+
 
     # government.agent.openapi.de4a.eu:
     #     container_name: government.agent.openapi.de4a.eu
