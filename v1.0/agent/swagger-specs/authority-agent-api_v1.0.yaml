@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: DE4A Authority Agent
-  version: 1.0.0
+  version: 0.0.3
 servers:
   - url: 'http://164.8.250.43:8080/v1'
 tags:
@@ -518,8 +518,10 @@ components:
           items:
             type: string
         verifiableCredential:
-          type: object
-          $ref: '#/components/schemas/VerifiableCredential'
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/VerifiableCredential'
         
     SchemaValidation:
       type: object
