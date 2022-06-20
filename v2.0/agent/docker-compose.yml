@@ -1,0 +1,103 @@
+government.agent.de4a.eu:
+        container_name: ${DOMAIN}
+        image: ${AGENT_REST_IMAGE}:${AGENT_REST_IMAGE_TAG}
+        restart: always
+        environment:
+            - ARIESD_API_HOST=${GOV_HOST}:${GOV_API_PORT}
+            - ARIESD_INBOUND_HOST=${HTTP_SCHEME}@${GOV_HOST}:${GOV_INBOUND_PORT}
+            - ARIESD_INBOUND_HOST_EXTERNAL=${HTTP_SCHEME}@http://${DOMAIN}:${GOV_INBOUND_PORT}
+            - ARIESD_WEBHOOK_URL=http://${GOV_WEBHOOK_HOST}:${GOV_WEBHOOK_PORT}/de4a-agent/v2/webhook
+            - ARIESD_DEFAULT_LABEL=de4a-aries-agent
+            - ARIESD_AUTO_ACCEPT=true
+            - ARIESD_DATABASE_TYPE=leveldb
+            - ARIESD_DATABASE_PREFIX=data/
+            - ARIESD_DATABASE_TIMEOUT=60
+            - ARIESD_HTTP_RESOLVER=${HTTP_DID_RESOLVER}
+            - ARIESD_CONTEXT_PROVIDER_URL=${CONTEXT_PROVIDER_URL}
+            - ARIESD_MEDIA_TYPE_PROFILES=${DEFAULT_MEDIA_TYPE_PROFILES}
+            - ARIESD_KEY_TYPE=${DEFAULT_KEY_TYPE}
+            - ARIESD_KEY_AGREEMENT_TYPE=${DEFAULT_KEY_AGREEMENT_TYPE}
+            #- TLS_CERT_FILE=/etc/tls/ec-pubCert.pem
+            #- TLS_KEY_FILE=/etc/tls/ec-key.pem
+            # volumes:
+            # - ./keys/tls:/etc/tls
+        ports:
+            - ${GOV_INBOUND_PORT}:${GOV_INBOUND_PORT}
+            - ${GOV_API_PORT}:${GOV_API_PORT}
+        volumes:
+            - aries_data:/data
+        entrypoint: ""
+        # command: /bin/sh -c "cp /etc/tls/* /usr/local/share/ca-certificates/;update-ca-certificates; aries-agent-rest start"
+        command: /bin/sh -c "aries-agent-rest start"
+        networks:
+            - de4a_net
+        depends_on:
+            - context.server.de4a.eu
+
+    couchdb.de4a.eu:
+        container_name: couchdb.de4a.eu
+        image: ${COUCHDB_IMAGE}:${COUCHDB_IMAGE_TAG}
+        restart: always
+        ports:
+            - ${COUCHDB_PORT}:${COUCHDB_PORT}
+        environment:
+            - COUCHDB_USER=${COUCHDB_USER}
+            - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+        volumes:
+            - ./couchdb-config/10-single-node.ini:/opt/couchdb/etc/local.d/10-single-node.ini
+            - db_data:/opt/couchdb/data
+        networks:
+            - de4a_net
+
+    government.agent.api.de4a.eu:
+        container_name: ${AGENT_API_CONTAINER_NAME}
+        image: ${AGENT_API_IMAGE}:${AGENT_API_IMAGE_TAG}
+        restart: always
+        ports:
+            - 0.0.0.0:${AGENT_API_PORT}:8080
+        volumes:
+            - ./api-java/conf/app.properties:/usr/local/tomcat/conf/app.properties
+            - ./api-java/data:/usr/local/tomcat/webapps/data
+        depends_on:
+            - couchdb.de4a.eu 
+        networks:
+            - de4a_net
+
+    government.agent.openapi.de4a.eu:
+        container_name: government.agent.openapi.de4a.eu
+        image: swaggerapi/swagger-ui
+        restart: always
+        environment:
+            - SWAGGER_JSON=/specs/authority-agent-api_v1.0.yaml
+            - BASE_URL=/openapi
+        ports:
+             - 3000:8080
+        volumes:
+            - ./swagger-specs:/specs
+        networks:
+            - de4a_net
+
+    context.server.de4a.eu:
+        container_name: ${DOMAIN_CONTEXT}
+        image: halverneus/static-file-server:latest
+        restart: always
+        environment:
+            - PORT=9099
+            - FOLDER=/data
+            # - TLS_CERT=/etc/tls/ec-pubCert.pem
+            # - TLS_KEY=/etc/tls/ec-key.pem
+        ports:
+            - "9099:9099"
+        volumes:
+            - ./json-ld-contexts:/data
+            # - ../keys/tls:/etc/tls
+        networks:
+            - de4a_net
+
+volumes:
+    aries_data: {}
+    db_data: {}
+
+networks:
+    de4a_net:
+        driver: bridge

@@ -12,7 +12,7 @@ This project contains files and scripts for deploying the DE4A SSI Authority Age
 
 ## Set environment variables
 
-Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v1.0/agent/.env`):
+Before the deployment of SSI Authority Agent, the following environment variable must be set (path: `v2.0/agent/.env`):
 
 -   DOMAIN=<INSERT_PUBLIC_DOMAIN_HERE> (replace <INSERT_PUBLIC_DOMAIN_HERE> with your host's public domain name)
 -   COUCHDB_USER=<INSERT_COUCHDB_USER_HERE> (replace <INSERT_COUCHDB_USER_HERE> with database's administrator username)
@@ -30,17 +30,17 @@ In the deployment, several Docker containers are started. We have created a dock
 Docker Compose file contains the following containers:
 
 -   SSI Authority Agent Java REST server
+-   **JSON-LD Context Server (added in iteration 2)**
 -   Aries Go REST server
--   A webhook server
 -   CouchDB database server
 
 Deployment diagram:
 
 <img src="deployment_diagram.png" alt="Deployment Diagram" width="1000"/>
 
-You can find more details of the container's configuration within the file `v1.0/agent/docker-compose.yml`.
+You can find more details of the container's configuration within the file `v2.0/agent/docker-compose.yml`.
 
-The configuration parameters to feed the docker compose is in the file `v1.0/agent/.env`.
+The configuration parameters to feed the docker compose is in the file `v2.0/agent/.env`. Furthermore, the implementation guidelines for the VC pattern flow simplification in portals can be found in `v2.0/DE4A_VC_flow_guidelines.pdf`.
 
 > Please review the contents of this configuration file to fit your development, for instance, you can change ports according to your needs.
 
@@ -55,9 +55,9 @@ $cd testing-environment
 $./generate_test_keys.sh
 ```` -->
 
-Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`app.properties`) can be found under `v1.0/agent/api-java/conf` folder. 
+Once the Aries-related components are configured, it is necessary to adjust the properties required to run the SSI Authority Agent. The properties file (`app.properties`) can be found under `v2.0/agent/api-java/conf` folder. 
 Since the Authority Agent API communicates with the Aries Go server and the CouchDB database, it is necessary to specify the name of the database where internal status of DID, VC and VP status will be stored along with the credentials for connecting to this database.
-The following entries in `v1.0/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
+The following entries in `v2.0/agent/api-java/conf/app.properties` file for the SSI Authority Agent API need to be changed before running the Docker containers:
 ```bash
 db.ip.address=http://couchdb.de4a.eu:5984/
 db.username=<INSERT DB administrator username>
@@ -67,9 +67,19 @@ alias=<INSERT ORGANIZATION ALIAS NAME> (example value: MIZSSlovenia)
 aries.enterprise.ip.address=<INSERT_PUBLIC_DOMAIN_HERE>:8082/
 signature.type=Ed25519Signature2018
 bearer.token=<INSERT session token value obtained from the EBSI onboarding website (steps explained below)>
+
+--- added in iteration 2 ---
+organization.img.url=<INSERT PUBLIC URL WITH LOGO IMAGE OF THE ORGANIZATION>
+client.url=<INSERT ENDPOINT URL OF THE PORTAL>
+vc.schema.url=http://de4a-dev-schema.informatika.uni-mb.si:9099/de4a-diploma-schema.json
 ```
 
 Note that the `alias` property is needed when generating DID connection invitations to students in order to display the shortened name of the organization sending an invitation to the student.
+
+** Parameters added in iteration 2: ** 
+- `organization.img.url` - the parameter is needed during establishing DID connection with the student's mobile agent. The image available on this URL is displayed as an organization's icon in the student's mobile phone;
+- `client.url` - the parameter is used to send status update notifications from the Authority Agent to the Evidence/eProcedure portal already used by the organization. The API endpoint implemented on this URL should be a POST method, which receives a string object in the POST request body;
+- `vc.schema.url` - the parameter is needed to support VC schema evaluation during VC issuance and VP validation processes. The value does **not** need to be changed, as the schema description file is hosted by UM. 
 
 ### EBSI integration and signing Verifiable Credentials
 
@@ -82,7 +92,7 @@ The obtained token is valid for a limited time (15 minutes), so you need to star
 
 Once these basic environment properties are changed, you can proceed to starting the containers.
 
-**Important additional step in the v1.0 release**: To successfully validate the verifiable credentials issued by your organization, you will need to register your organization as a Trusted Issuer into the EBSI TIR Registry. For this step, you will need to contact the EBSI Service Desk team via email and request them to manually register your organization into the TIR registry.
+**Important additional step in the v2.0 release**: To successfully validate the verifiable credentials issued by your organization, you will need to register your organization as a Trusted Issuer into the EBSI TIR Registry. For this step, you will need to contact the EBSI Service Desk team via email and request them to manually register your organization into the TIR registry.
 Contact information for the Service Desk can be found at [here](https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/EBSI+Service+Desk). In your request email, you will need to include the information about the DID:ebsi value, which is generated for your organization by the SSI Authority Agent on startup. The value can be retrieved directly by calling the `/get-did-ebsi` method in the AA API.
 
 ### Start containers
@@ -97,19 +107,19 @@ $docker-compose up -d
 If everything has gone well, you should be able to see something similar to this:
 
 ```bash
-Creating couchdb.de4a.eu              ... done
-Creating de4a.informatika.uni-mb.si   ... done
-Creating government.agent.api.de4a.eu ... done
-Creating government.webhook.de4a.eu   ... done
+Creating couchdb.de4a.eu                         ... done
+Creating de4a-dev.informatika.uni-mb.si              ... done
+Creating government.agent.api.v2.de4a.eu            ... done
+Creating de4a-dev-schema.informatika.uni-mb.si   ... done
 ```
 
 ### SSI Authority Agent logging
 
-The logging functionality of the Authority Agent has been externalized to correspond to the pilot metrics and remove sensitive data from the output. Specifically, the `government.agent.api.de4a.eu` Docker service representing the Authority Agent API logs events and error in `/usr/local/tomcat/logs/de4a-metrics-log.txt` file in the Docker container.
+The logging functionality of the Authority Agent has been externalized to correspond to the pilot metrics and remove sensitive data from the output. Specifically, the `government.agent.api.v2.de4a.eu` Docker service representing the Authority Agent API logs events and error in `/usr/local/tomcat/logs/de4a-metrics-log.txt` file in the Docker container.
 To access the contents of that file, you need to enter the command line of the Docker container by executing the following line (once the containers are running):
 
 ```
-docker exec -it government.agent.api.de4a.eu /bin/bash
+docker exec -it government.agent.api.v2.de4a.eu /bin/bash
 cd ..
 cd logs
 cat de4a-metrics-log.txt
@@ -133,7 +143,7 @@ DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authorit
 To see the logs of each container printed in the console, you can also use the following command:
 
 ```bash
-$docker logs -f government.agent.api.de4a.eu
+$docker logs -f government.agent.api.v2.de4a.eu
 ```
 
 Specifically, in the logs of the government.agent.api.de4a.eu container, you will see the output of registering the generated DID to EBSI DID registry. You will see a generated DID:ebsi alongside two other keys needed for the communication with EBSI APIs. As the final result, you should see the status message saying that the onboarding process finished successfully.
@@ -152,15 +162,15 @@ $docker-compose stop
 If everything goes well, you should be able to see the following:
 
 ```bash
-Stopping government.agent.api.de4a.eu ... done
-Stopping government.webhook.de4a.eu   ... done
-Stopping couchdb.de4a.eu              ... done
-Stopping de4a.informatika.uni-mb.si   ... done
-Removing government.agent.api.de4a.eu ... done
-Removing government.webhook.de4a.eu   ... done
-Removing couchdb.de4a.eu              ... done
-Removing de4a.informatika.uni-mb.si   ... done
-Removing network agent_bdd_net        ... done
+Stopping government.agent.api.v2.de4a.eu            ... done
+Stopping de4a-dev-schema.informatika.uni-mb.si   ... done
+Stopping couchdb.de4a.eu                         ... done
+Stopping de4a-dev.informatika.uni-mb.si              ... done
+Removing government.agent.api.v2.de4a.eu            ... done
+Removing de4a-dev-schema.informatika.uni-mb.si   ... done
+Removing couchdb.de4a.eu                         ... done
+Removing de4a-dev.informatika.uni-mb.si              ... done
+Removing network agent_bdd_net                   ... done
 ```
 
 ### Testing the SSI Authority Agent deployment
@@ -172,7 +182,7 @@ The following request is made:
 
 ``` bash
 curl -X 'GET' \
-  'http://<IP ADDRESS:PORT>/v1/did-conn-status/alice' \
+  'http://<IP ADDRESS:PORT>/de4a-agent/v2/did-conn-status/alice' \
   -H 'accept: application/json'
 ```
 
@@ -180,19 +190,19 @@ Please note that the Authority Agent accepts only incoming requests via the HTTP
 
 The above request should return `-1`, as there is no DID connection for user ID "alice" at the beginning.
 
+** Flow of API requests in iteration 2: **
+
 The flow of API requests for the DP side is the following:
 1.  `/generate-invitation`
 2.  `/did-conn-status/{userId}`
 3.  `/send-vc-offer` 
 4.  `/check-offer-vc-response/{userId}` 
-5.  `/send-vc` 
 
 The flow of API requests for the DC side is the following:
 1.  `/generate-invitation`
 2.  `/did-conn-status/{userId}`
 3.  `/send-vp-request` 
 4.  `/check-request-vp-response/{userId}`
-5.  `/validate-vp/{userId}` 
 
 <!-- Document is comprised as follows:
 
