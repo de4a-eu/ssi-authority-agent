@@ -6,7 +6,7 @@ government.agent.de4a.eu:
             - ARIESD_API_HOST=${GOV_HOST}:${GOV_API_PORT}
             - ARIESD_INBOUND_HOST=${HTTP_SCHEME}@${GOV_HOST}:${GOV_INBOUND_PORT}
             - ARIESD_INBOUND_HOST_EXTERNAL=${HTTP_SCHEME}@http://${DOMAIN}:${GOV_INBOUND_PORT}
-            - ARIESD_WEBHOOK_URL=http://${GOV_WEBHOOK_HOST}:${GOV_WEBHOOK_PORT}/de4a-agent/v2/webhook
+            - ARIESD_WEBHOOK_URL=http://${GOV_WEBHOOK_HOST}:${GOV_WEBHOOK_PORT}/v2/webhook
             - ARIESD_DEFAULT_LABEL=de4a-aries-agent
             - ARIESD_AUTO_ACCEPT=true
             - ARIESD_DATABASE_TYPE=leveldb
@@ -49,7 +49,7 @@ government.agent.de4a.eu:
         networks:
             - de4a_net
 
-    government.agent.api.de4a.eu:
+    government.agent.api.v2.de4a.eu:
         container_name: ${AGENT_API_CONTAINER_NAME}
         image: ${AGENT_API_IMAGE}:${AGENT_API_IMAGE_TAG}
         restart: always
