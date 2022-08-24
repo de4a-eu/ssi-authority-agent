@@ -63,7 +63,7 @@ db.ip.address=http://couchdb.de4a.eu:5984/
 db.username=<INSERT DB administrator username>
 db.password=<INSERT DB administrator password>
 db.name=<INSERT DB name, which will created when using the Authority Agent automatically> (example value: de4a-authority-agent)
-alias=<INSERT ORGANIZATION ALIAS NAME> (example value: MIZSSlovenia)
+alias=<INSERT ORGANIZATION ALIAS NAME> (example value: MIZŠ-SI)
 aries.enterprise.ip.address=<INSERT_PUBLIC_DOMAIN_HERE>:8082/
 signature.type=Ed25519Signature2018
 bearer.token=<INSERT session token value obtained from the EBSI onboarding website (steps explained below)>
@@ -72,21 +72,34 @@ bearer.token=<INSERT session token value obtained from the EBSI onboarding websi
 organization.img.url=<INSERT PUBLIC URL WITH LOGO IMAGE OF THE ORGANIZATION>
 client.url=<INSERT ENDPOINT URL OF THE PORTAL>
 vc.schema.url=http://de4a-dev-schema.informatika.uni-mb.si:9099/de4a-diploma-schema.json
+do.url=http://eportal.v2.de4a.eu:8080 (optional for Verifiers)
+de.url=http://eportal.v2.de4a.eu:8080 (optional for Issuers)
 ```
-
+exi
 Note that the `alias` property is needed when generating DID connection invitations to students in order to display the shortened name of the organization sending an invitation to the student.
 
-** Parameters added in iteration 2: ** 
+**Parameters added in iteration 2:** 
 - `organization.img.url` - the parameter is needed during establishing DID connection with the student's mobile agent. The image available on this URL is displayed as an organization's icon in the student's mobile phone;
 - `client.url` - the parameter is used to send status update notifications from the Authority Agent to the Evidence/eProcedure portal already used by the organization. The API endpoint implemented on this URL should be a POST method, which receives a string object in the POST request body;
 - `vc.schema.url` - the parameter is needed to support VC schema evaluation during VC issuance and VP validation processes. The value does **not** need to be changed, as the schema description file is hosted by UM. 
+- `do.url` - the parameter is to be specified by the organization that acts as the Issuer of Verifiable Credentials, and it contains the main URL of the Issuer's Evidence Portal. The parameter is used *only for DE4A logging purposes.
+- `de.url` - the parameter is to be specified by the organization that acts as the Verifier of submitted Verifiable Credentials, and it contains the main URL of the Verifier's eProcedure Portal. The parameter is used only for DE4A logging purposes.
+
+### Re-deploying the SSI Authority Agent API for iteration 2
+
+To avoid additional procedures regarding manual registration of Issuers in the EBSI Trusted Issuer Registry, it is possible to re-deploy the Authority Agent REST API service by simply retrieving the latest Docker image from DE4A DockerHub before running the `docker-compose` file:
+```bash
+docker pull de4a/de4a-ssi-authority-agent-base
+```
+
+This will pull the latest Docker image of the REST API without deleting the DID- and EBSI-related keys already generated for your Authority Agent instance in iteration 1. Once you retrieved the updated Docker image, you can proceed to start the containers.
 
 ### EBSI integration and signing Verifiable Credentials
 
 The Authority Agent will generate a DID:ebsi on the first startup automatically, which is then used to sign Verifiable Credentials issued by the Trusted Issuer. A generated DID:ebsi imported into the Aries government agent is a pre-condition step for generating VCs.
 This step is automatized by using the EBSI connector integrated into the Authority Agent. The EBSI Connector is executed automatically by the Authority Agent once you run the docker compose.  
 The integrated EBSI connector will generate a new DID:ebsi and the necessary keys on the first startup of the Authority Agent, register the DID into the EBSI DID Registry and import the necessary keys into the Aries government agent so that it can sign the VC with the DID:ebsi and check the digital signature during the VC validation.
-To perform these steps, the EBSI connector needs to communicate with EBSI APIs and to establish this communication, it requires a bearer token, whose value is specified in the configuration file before starting the Docker containers (`v1.0/agent/api-java/conf/app.properties`). 
+To perform these steps, the EBSI connector needs to communicate with EBSI APIs and to establish this communication, it requires a bearer token, whose value is specified in the configuration file before starting the Docker containers (`v2.0/agent/api-java/conf/app.properties`). 
 IMPORTANT: the bearer token needs to be obtained manually from the EBSI website and copied into the configuration file before running the Docker containers! To do this, go to [https://app.preprod.ebsi.eu/users-onboarding/] -> Onboard with Captcha -> Desktop Wallet and copy the session token.
 The obtained token is valid for a limited time (15 minutes), so you need to start the Authority Agent within that period. Otherwise, you will need to repeat the process and obtain a new token.
 
@@ -175,14 +188,14 @@ Removing network agent_bdd_net                   ... done
 
 ### Testing the SSI Authority Agent deployment
 
-You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (pre-condition: change the server IP address in file `v1.0/authority-agent-api_v1.0.yml`). 
+You can test if the deployment of the SSI Authority Agent has been successfull directly by calling its API methods from the preferred API development tool (e.g. Postman) by following the API methods described in the Swagger documentation (pre-condition: change the server IP address in file `v2.0/authority-agent-api_v2.0.yml`). 
 
 You can test if the Authority Agent is working properly by checking the current DID connection status for a random user ID (note: replace IP ADDRESS:PORT with your Authority Agent server address). 
 The following request is made:
 
 ``` bash
 curl -X 'GET' \
-  'http://<IP ADDRESS:PORT>/de4a-agent/v2/did-conn-status/alice' \
+  'http://<IP ADDRESS:PORT>/v2/did-conn-status/alice' \
   -H 'accept: application/json'
 ```
 
@@ -192,17 +205,19 @@ The above request should return `-1`, as there is no DID connection for user ID 
 
 ** Flow of API requests in iteration 2: **
 
-The flow of API requests for the DP side is the following:
-1.  `/generate-invitation`
-2.  `/did-conn-status/{userId}`
-3.  `/send-vc-offer` 
-4.  `/check-offer-vc-response/{userId}` 
+The flow of API requests for the Issuer's side is the following:
+1.  `/did-conn-status/{userId}`
+2.  `/generate-invitation`
+3.  `/did-conn-status/{userId}` (for websockets purposes)
+4.  `/send-vc-offer` 
+5.  `/check-offer-vc-response/{userId}` 
 
-The flow of API requests for the DC side is the following:
-1.  `/generate-invitation`
-2.  `/did-conn-status/{userId}`
-3.  `/send-vp-request` 
-4.  `/check-request-vp-response/{userId}`
+The flow of API requests for the Verifier's side is the following:
+1.  `/did-conn-status/{userId}`
+2.  `/generate-invitation`
+3.  `/did-conn-status/{userId}` (for websockets purposes)
+4.  `/send-vp-request` 
+5.  `/check-request-vp-response/{userId}`
 
 <!-- Document is comprised as follows:
 
