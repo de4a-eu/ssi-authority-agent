@@ -72,10 +72,10 @@ bearer.token=<INSERT session token value obtained from the EBSI onboarding websi
 organization.img.url=<INSERT PUBLIC URL WITH LOGO IMAGE OF THE ORGANIZATION>
 client.url=<INSERT ENDPOINT URL OF THE PORTAL>
 vc.schema.url=http://de4a-dev-schema.informatika.uni-mb.si:9099/de4a-diploma-schema.json
-do.url=http://eportal.v2.de4a.eu:8080 (optional for Verifiers)
-de.url=http://eportal.v2.de4a.eu:8080 (optional for Issuers)
+do.url=<INSERT PORTAL PUBLIC URI> (optional for Verifiers)
+de.url=<INSERT PORTAL PUBLIC URI> (optional for Issuers)
 ```
-exi
+exit
 Note that the `alias` property is needed when generating DID connection invitations to students in order to display the shortened name of the organization sending an invitation to the student.
 
 **Parameters added in iteration 2:** 
@@ -122,17 +122,17 @@ If everything has gone well, you should be able to see something similar to this
 ```bash
 Creating couchdb.de4a.eu                         ... done
 Creating de4a-dev.informatika.uni-mb.si              ... done
-Creating government.agent.api.v2.de4a.eu            ... done
+Creating government.agent.api.de4a.eu            ... done
 Creating de4a-dev-schema.informatika.uni-mb.si   ... done
 ```
 
 ### SSI Authority Agent logging
 
-The logging functionality of the Authority Agent has been externalized to correspond to the pilot metrics and remove sensitive data from the output. Specifically, the `government.agent.api.v2.de4a.eu` Docker service representing the Authority Agent API logs events and error in `/usr/local/tomcat/logs/de4a-metrics-log.txt` file in the Docker container.
+The logging functionality of the Authority Agent has been externalized to correspond to the pilot metrics and remove sensitive data from the output. Specifically, the `government.agent.api.de4a.eu` Docker service representing the Authority Agent API logs events and error in `/usr/local/tomcat/logs/de4a-metrics-log.txt` file in the Docker container.
 To access the contents of that file, you need to enter the command line of the Docker container by executing the following line (once the containers are running):
 
 ```
-docker exec -it government.agent.api.v2.de4a.eu /bin/bash
+docker exec -it government.agent.api.de4a.eu /bin/bash
 cd ..
 cd logs
 cat de4a-metrics-log.txt
@@ -140,23 +140,21 @@ cat de4a-metrics-log.txt
 
 If the EBSI Connector successfully executed all steps, you should see the following lines at the beginning of the `de4a-metrics-log.txt` logs file:
 ```
-DE4A METRICS - [2021-09-16 06:43:11.359] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01006] [EBSI-CONNECTOR] Established connection with internal database.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01013] [EBSI-CONNECTOR] Successfully read EBSI bearer token value.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01014] [EBSI-CONNECTOR] Successfully created files for EBSI integration.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01014] [EBSI-CONNECTOR] Successfully generated Secp256k1 key.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01015] [EBSI-CONNECTOR] Successfully generated Ed25519 key.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01015] [EBSI-CONNECTOR] Successfully generated DID.
-DE4A METRICS - [2021-09-16 06:43:11.357] [SEVERE] [EBSI Connector] [1.3] [Authority Agent] [1016] Error onboarding organization into EBSI Trusted Issuer Registry.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01016] [EBSI-CONNECTOR] Successfully onboarded organization into EBSI Trusted Issuer Registry.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01017] [EBSI-CONNECTOR] Successfully exported JWK private key.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01006] Stored current state in the Authority Agent database.
-DE4A METRICS - [2021-09-16 06:43:11.357] [INFO] [EBSI Connector] [1.3] [Authority Agent] [01008] [EBSI-CONNECTOR] Successfully imported DID document into Aries.
+[2022-08-25 08:31:09.158] [INFO] [AAI24] [MIZŠ-SI] [UC#1.3] EBSI-CONNECTOR: Successfully created files for EBSI integration.
+[2022-08-25 08:31:09.158] [INFO] [AAI25] [MIZŠ-SI] [UC#1.3] EBSI-CONNECTOR: Successfully generated key: ECDSA_Secp256k1, value: 40cab418940b4e0ebdc6630ae627d463.
+[2022-08-25 08:31:09.158] [INFO] [AAI25] [MIZŠ-SI] [UC#1.3] EBSI-CONNECTOR: Successfully generated key: EdDSA_Ed25519, value: 2e0e72440c1d42588753d6978f7975c0.
+[2022-08-25 08:31:09.158] [INFO] [AAI25] [MIZŠ-SI] [UC#1.3] EBSI-CONNECTOR: Successfully generated key: DID:ebsi, value: did:ebsi:zvuSWb9znaPRcX2JjgsBQWh.
+[2022-08-25 08:31:09.158] [INFO] [AAI33] [MIZŠ-SI] [UC#1.3] [EBSI-CONNECTOR] Successfully anchored DID did:ebsi:zvuSWb9znaPRcX2JjgsBQWh for organization MIZŠ-SI into the EBSI DID Registry.
+[2022-08-25 08:31:09.158] [INFO] [AAI26] [MIZŠ-SI] [UC#1.3] EBSI-CONNECTOR: Successfully exported JWK private key.
+[2022-08-25 08:31:09.158] [INFO] [AAI13] [MIZŠ-SI] [UC#1.3] EBSI-CONNECTOR: Stored current state in Authority Agent internal database.
+[2022-08-25 08:31:17.370] [INFO] [AAI12] [MIZŠ-SI] [UC#1.3] EBSI-CONNECTOR: Processing the JSON response received from /kms/import.
+[2022-08-25 08:31:09.158] [INFO] [AAI27] [MIZŠ-SI] [UC#1.3] EBSI-CONNECTOR: Successfully imported DID document into Aries..
 ```
 
 To see the logs of each container printed in the console, you can also use the following command:
 
 ```bash
-$docker logs -f government.agent.api.v2.de4a.eu
+$docker logs -f government.agent.api.de4a.eu
 ```
 
 Specifically, in the logs of the government.agent.api.de4a.eu container, you will see the output of registering the generated DID to EBSI DID registry. You will see a generated DID:ebsi alongside two other keys needed for the communication with EBSI APIs. As the final result, you should see the status message saying that the onboarding process finished successfully.
@@ -175,11 +173,11 @@ $docker-compose stop
 If everything goes well, you should be able to see the following:
 
 ```bash
-Stopping government.agent.api.v2.de4a.eu            ... done
+Stopping government.agent.api.de4a.eu            ... done
 Stopping de4a-dev-schema.informatika.uni-mb.si   ... done
 Stopping couchdb.de4a.eu                         ... done
 Stopping de4a-dev.informatika.uni-mb.si              ... done
-Removing government.agent.api.v2.de4a.eu            ... done
+Removing government.agent.api.de4a.eu            ... done
 Removing de4a-dev-schema.informatika.uni-mb.si   ... done
 Removing couchdb.de4a.eu                         ... done
 Removing de4a-dev.informatika.uni-mb.si              ... done

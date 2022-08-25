@@ -49,7 +49,7 @@ government.agent.de4a.eu:
         networks:
             - de4a_net
 
-    government.agent.api.v2.de4a.eu:
+    government.agent.api.de4a.eu:
         container_name: ${AGENT_API_CONTAINER_NAME}
         image: ${AGENT_API_IMAGE}:${AGENT_API_IMAGE_TAG}
         restart: always
