@@ -68,7 +68,7 @@ government.agent.de4a.eu:
         image: swaggerapi/swagger-ui
         restart: always
         environment:
-            - SWAGGER_JSON=/specs/authority-agent-api_v1.0.yaml
+            - SWAGGER_JSON=/specs/authority-agent-api_v2.0.yaml
             - BASE_URL=/openapi
         ports:
              - 3000:8080
