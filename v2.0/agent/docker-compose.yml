@@ -1,4 +1,7 @@
-government.agent.de4a.eu:
+version: "3"
+
+services:
+    government.agent.de4a.eu:
         container_name: ${DOMAIN}
         image: ${AGENT_REST_IMAGE}:${AGENT_REST_IMAGE_TAG}
         restart: always

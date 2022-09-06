@@ -94,6 +94,7 @@ docker pull de4a/de4a-ssi-authority-agent-base
 
 This will pull the latest Docker image of the REST API without deleting the DID- and EBSI-related keys already generated for your Authority Agent instance in iteration 1. Once you retrieved the updated Docker image, you can proceed to start the containers.
 
+**Note**: in order to re-use the did:ebsi identifier and the relevant keys generated for iteration 1, the Aries and Authority Agent (`government.agent.de4a.eu` and `government.agent.api.de4a.eu` services in the `v2.0/agent/docker-compose.yml` file) should mount the same `data` directory as their volume, which was used in 1st iteration, so that the previously generated data can be read by these two Docker services.. 
 ### EBSI integration and signing Verifiable Credentials
 
 The Authority Agent will generate a DID:ebsi on the first startup automatically, which is then used to sign Verifiable Credentials issued by the Trusted Issuer. A generated DID:ebsi imported into the Aries government agent is a pre-condition step for generating VCs.
