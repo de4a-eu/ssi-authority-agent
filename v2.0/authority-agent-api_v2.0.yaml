@@ -3,7 +3,7 @@ info:
   title: DE4A Authority Agent
   version: "2.0"
 servers:
-  - url: 'http://164.8.250.45:8080/de4a-agent/v2'
+  - url: 'http://164.8.250.45:8080/v2'
 tags:
    
   - name: DID connection
