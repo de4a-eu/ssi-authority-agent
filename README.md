@@ -101,7 +101,7 @@ The Authority Agent will generate a DID:ebsi on the first startup automatically,
 This step is automatized by using the EBSI connector integrated into the Authority Agent. The EBSI Connector is executed automatically by the Authority Agent once you run the docker compose.  
 The integrated EBSI connector will generate a new DID:ebsi and the necessary keys on the first startup of the Authority Agent, register the DID into the EBSI DID Registry and import the necessary keys into the Aries government agent so that it can sign the VC with the DID:ebsi and check the digital signature during the VC validation.
 To perform these steps, the EBSI connector needs to communicate with EBSI APIs and to establish this communication, it requires a bearer token, whose value is specified in the configuration file before starting the Docker containers (`v2.0/agent/api-java/conf/app.properties`). 
-IMPORTANT: the bearer token needs to be obtained manually from the EBSI website and copied into the configuration file before running the Docker containers! To do this, go to [https://app.preprod.ebsi.eu/users-onboarding/] -> Onboard with Captcha -> Desktop Wallet and copy the session token.
+IMPORTANT: the bearer token needs to be obtained manually from the EBSI website and copied into the configuration file before running the Docker containers! To do this, go to [https://app-pilot.ebsi.eu/users-onboarding/v2] -> Onboard with Captcha -> Desktop Wallet and copy the session token.
 The obtained token is valid for a limited time (15 minutes), so you need to start the Authority Agent within that period. Otherwise, you will need to repeat the process and obtain a new token.
 
 Once these basic environment properties are changed, you can proceed to starting the containers.
@@ -194,7 +194,7 @@ The following request is made:
 
 ``` bash
 curl -X 'GET' \
-  'http://<IP ADDRESS:PORT>/v2/did-conn-status/alice' \
+  'http://<IP ADDRESS:PORT>/de4a-agent/v2/did-conn-status/alice' \
   -H 'accept: application/json'
 ```
 
@@ -209,14 +209,14 @@ The flow of API requests for the Issuer's side is the following:
 2.  `/generate-invitation`
 3.  `/did-conn-status/{userId}` (for websockets purposes)
 4.  `/send-vc-offer` 
-5.  `/check-offer-vc-response/{userId}` 
+5.  `/check-offer-vc-response/{userId}` (for websockets purposes)
 
 The flow of API requests for the Verifier's side is the following:
 1.  `/did-conn-status/{userId}`
 2.  `/generate-invitation`
 3.  `/did-conn-status/{userId}` (for websockets purposes)
 4.  `/send-vp-request` 
-5.  `/check-request-vp-response/{userId}`
+5.  `/check-request-vp-response/{userId}` (for websockets purposes)
 
 <!-- Document is comprised as follows:
 
