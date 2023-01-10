@@ -194,7 +194,7 @@ The following request is made:
 
 ``` bash
 curl -X 'GET' \
-  'http://<IP ADDRESS:PORT>/de4a-agent/v2/did-conn-status/alice' \
+  'http://<IP ADDRESS:PORT>/v2/did-conn-status/alice' \
   -H 'accept: application/json'
 ```
 

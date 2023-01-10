@@ -9,7 +9,7 @@ services:
             - ARIESD_API_HOST=${GOV_HOST}:${GOV_API_PORT}
             - ARIESD_INBOUND_HOST=${HTTP_SCHEME}@${GOV_HOST}:${GOV_INBOUND_PORT}
             - ARIESD_INBOUND_HOST_EXTERNAL=${HTTP_SCHEME}@http://${DOMAIN}:${GOV_INBOUND_PORT}
-            - ARIESD_WEBHOOK_URL=http://${GOV_WEBHOOK_HOST}:${GOV_WEBHOOK_PORT}/de4a-agent/v2/webhook
+            - ARIESD_WEBHOOK_URL=http://${GOV_WEBHOOK_HOST}:${GOV_WEBHOOK_PORT}/v2/webhook
             - ARIESD_DEFAULT_LABEL=de4a-aries-agent
             - ARIESD_AUTO_ACCEPT=true
             - ARIESD_DATABASE_TYPE=leveldb
